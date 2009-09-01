@@ -63,6 +63,8 @@ namespace ChessLib
                         fwdMove.Color = piece.color;
                         validMoves.Add(fwdMove);
 
+                        // TODO: pawn promotion
+
                         // 2 - twice forward square
 
                         // TODO: twice forward square, en passant rule

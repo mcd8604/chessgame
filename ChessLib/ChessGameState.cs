@@ -323,7 +323,7 @@ namespace ChessLib
                     // invalid move
                     return false;
 
-                // Update boards
+                // Update source boards
                 if (move.Piece == ChessPieceType.Pawn)
                 {
                     wP[srcIndex] = false;
@@ -358,6 +358,18 @@ namespace ChessLib
                 WhitePieces[srcIndex] = false;
                 WhitePieces[destIndex] = true;
 
+                // update destination boards
+
+                if (BlackPieces[destIndex])
+                {
+                    BlackPieces[destIndex] = false;
+                    bP[destIndex] = false;
+                    bN[destIndex] = false;
+                    bB[destIndex] = false;
+                    bR[destIndex] = false;
+                    bQ[destIndex] = false;
+                }
+
                 CurMoveColor = ChessColor.Black;
             }
             else
@@ -365,8 +377,9 @@ namespace ChessLib
                 // Check destination index
                 if (BlackPieces[destIndex])
                     // invalid move
-                    return false;
+                     return false;
 
+                // Update source boards
                 if (move.Piece == ChessPieceType.Pawn)
                 {
                     bP[srcIndex] = false;
@@ -401,6 +414,17 @@ namespace ChessLib
                 BlackPieces[srcIndex] = false;
                 BlackPieces[destIndex] = true;
 
+                // update destination boards
+
+                if (WhitePieces[destIndex])
+                {
+                    WhitePieces[destIndex] = false;
+                    wP[destIndex] = false;
+                    wN[destIndex] = false;
+                    wB[destIndex] = false;
+                    wR[destIndex] = false;
+                    wQ[destIndex] = false;
+                }
                 CurMoveColor = ChessColor.White;
             }
 
