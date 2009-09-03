@@ -22,11 +22,21 @@ namespace ChessLib
         King
     }
 
-    public struct ChessMove
+    public class ChessMove
     {
+        public ChessMove(int srcRow, int srcFile, int destRow, int destFile)
+        {
+            this.srcRow = srcRow;
+            this.srcFile = srcFile;
+            this.destRow = destRow;
+            this.destFile = destFile;
+        }
         public int srcRow, srcFile, destRow, destFile;
         public ChessColor Color;
-        public ChessPieceType Piece;
+        public ChessPieceType PieceType;
+        public bool EnPassant;
+        public bool Promotion;
+        public ChessPieceType PromotionType;
     }
 
     public class ChessPiece
@@ -324,32 +334,44 @@ namespace ChessLib
                     return false;
 
                 // Update source boards
-                if (move.Piece == ChessPieceType.Pawn)
+                if (move.PieceType == ChessPieceType.Pawn)
                 {
                     wP[srcIndex] = false;
-                    wP[destIndex] = true;
+                    if (!move.Promotion)
+                        wP[destIndex] = true;
+                    else
+                    {                        
+                        if (move.PromotionType == ChessPieceType.Knight)
+                            wN[destIndex] = true;
+                        else if (move.PromotionType == ChessPieceType.Bishop)
+                            wB[destIndex] = true;
+                        else if (move.PromotionType == ChessPieceType.Rook)
+                            wR[destIndex] = true;
+                        else if (move.PromotionType == ChessPieceType.Queen)
+                            wQ[destIndex] = true;
+                    }
                 }
-                if (move.Piece == ChessPieceType.Knight)
+                else if (move.PieceType == ChessPieceType.Knight)
                 {
                     wN[srcIndex] = false;
                     wN[destIndex] = true;
                 }
-                if (move.Piece == ChessPieceType.Bishop)
+                else if (move.PieceType == ChessPieceType.Bishop)
                 {
                     wB[srcIndex] = false;
                     wB[destIndex] = true;
                 }
-                if (move.Piece == ChessPieceType.Rook)
+                else if (move.PieceType == ChessPieceType.Rook)
                 {
                     wR[srcIndex] = false;
                     wR[destIndex] = true;
                 }
-                if (move.Piece == ChessPieceType.Queen)
+                else if (move.PieceType == ChessPieceType.Queen)
                 {
                     wQ[srcIndex] = false;
                     wQ[destIndex] = true;
                 }
-                if (move.Piece == ChessPieceType.King)
+                else if (move.PieceType == ChessPieceType.King)
                 {
                     wK[srcIndex] = false;
                     wK[destIndex] = true;
@@ -358,7 +380,7 @@ namespace ChessLib
                 WhitePieces[srcIndex] = false;
                 WhitePieces[destIndex] = true;
 
-                // update destination boards
+                // updated for captured piece
 
                 if (BlackPieces[destIndex])
                 {
@@ -368,6 +390,8 @@ namespace ChessLib
                     bB[destIndex] = false;
                     bR[destIndex] = false;
                     bQ[destIndex] = false;
+
+                    blackPieceList.Remove(pieceGrid[move.destFile, move.destRow]);
                 }
 
                 CurMoveColor = ChessColor.Black;
@@ -380,32 +404,44 @@ namespace ChessLib
                      return false;
 
                 // Update source boards
-                if (move.Piece == ChessPieceType.Pawn)
+                if (move.PieceType == ChessPieceType.Pawn)
                 {
                     bP[srcIndex] = false;
-                    bP[destIndex] = true;
+                    if (!move.Promotion)
+                        bP[destIndex] = true;
+                    else
+                    {
+                        if (move.PromotionType == ChessPieceType.Knight)
+                            bN[destIndex] = true;
+                        else if (move.PromotionType == ChessPieceType.Bishop)
+                            bB[destIndex] = true;
+                        else if (move.PromotionType == ChessPieceType.Rook)
+                            bR[destIndex] = true;
+                        else if (move.PromotionType == ChessPieceType.Queen)
+                            bQ[destIndex] = true;
+                    }
                 }
-                if (move.Piece == ChessPieceType.Knight)
+                else if (move.PieceType == ChessPieceType.Knight)
                 {
                     bN[srcIndex] = false;
                     bN[destIndex] = true;
                 }
-                if (move.Piece == ChessPieceType.Bishop)
+                else if (move.PieceType == ChessPieceType.Bishop)
                 {
                     bB[srcIndex] = false;
                     bB[destIndex] = true;
                 }
-                if (move.Piece == ChessPieceType.Rook)
+                else if (move.PieceType == ChessPieceType.Rook)
                 {
                     bR[srcIndex] = false;
                     bR[destIndex] = true;
                 }
-                if (move.Piece == ChessPieceType.Queen)
+                else if (move.PieceType == ChessPieceType.Queen)
                 {
                     bQ[srcIndex] = false;
                     bQ[destIndex] = true;
                 }
-                if (move.Piece == ChessPieceType.King)
+                else if (move.PieceType == ChessPieceType.King)
                 {
                     bK[srcIndex] = false;
                     bK[destIndex] = true;
@@ -414,7 +450,7 @@ namespace ChessLib
                 BlackPieces[srcIndex] = false;
                 BlackPieces[destIndex] = true;
 
-                // update destination boards
+                // updated for captured piece
 
                 if (WhitePieces[destIndex])
                 {
@@ -424,6 +460,8 @@ namespace ChessLib
                     wB[destIndex] = false;
                     wR[destIndex] = false;
                     wQ[destIndex] = false;
+
+                    whitePieceList.Remove(pieceGrid[move.destFile, move.destRow]);
                 }
                 CurMoveColor = ChessColor.White;
             }
@@ -435,6 +473,9 @@ namespace ChessLib
             ChessPiece piece = pieceGrid[move.srcFile, move.srcRow];
             piece.file = move.destFile;
             piece.row = move.destRow;
+            if (move.Promotion)
+                piece.type = move.PromotionType;
+
             pieceGrid[move.destFile, move.destRow] = piece;
             pieceGrid[move.srcFile, move.srcRow] = null;   
                      
@@ -442,6 +483,7 @@ namespace ChessLib
 
             moves.Add(move);
 #if DEBUG
+            Console.WriteLine("--------------\n");
             Console.WriteLine("WHITE PAWNS:");
             PrintBitArray(wP);
             Console.WriteLine("BLACK PAWNS:");

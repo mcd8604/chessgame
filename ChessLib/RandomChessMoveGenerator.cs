@@ -55,34 +55,33 @@ namespace ChessLib
                     // 1 - forward square
                     if (!state.AllPieces[curIndex + (dir * 8)])
                     {
-                        ChessMove fwdMove = new ChessMove();
-                        fwdMove.srcRow = piece.row;
-                        fwdMove.srcFile = piece.file;
-                        fwdMove.destFile = piece.file;
-                        fwdMove.destRow = piece.row + dir;
-                        fwdMove.Color = piece.color;
+                        ChessMove fwdMove = new ChessMove(piece.row, piece.file, piece.row + dir, piece.file);
                         validMoves.Add(fwdMove);
-
-                        // TODO: pawn promotion
 
                         // 2 - twice forward square
 
-                        // TODO: twice forward square, en passant rule
+                        // if Black pawn in initial square or
+                        // if White pawn in initial square
+                        if (((dir > 0 && piece.row == 1) || 
+                            (dir < 0 && piece.row == 6)) &&                             
+                            !state.AllPieces[curIndex + (dir * 16)])
+                        {
+                            ChessMove fwdTwoMove = new ChessMove(piece.row, piece.file, piece.row + dir * 2, piece.file);
+                            fwdTwoMove.EnPassant = true;
+                            validMoves.Add(fwdTwoMove);
+                        }
                     }
+
+                    bool eP = state.moves.Count > 0 ? state.moves[state.moves.Count - 1].EnPassant : false;
 
                     // 3 - right attack square
                     // (prevent out of bounds)
                     if ((piece.file != 0 || dir < 0) && 
                         (piece.file != 7 || dir > 0) &&
-                        enemyPieces[curIndex + (dir * 7)])
+                        (enemyPieces[curIndex + (dir * 7)] ||
+                        (eP && enemyPieces[curIndex - dir])))
                     {
-                        ChessMove rightMove = new ChessMove();
-                        rightMove.srcRow = piece.row;
-                        rightMove.srcFile = piece.file;
-                        rightMove.destFile = piece.file - dir;
-                        rightMove.destRow = piece.row + dir;
-                        rightMove.Piece = ChessPieceType.Pawn;
-                        rightMove.Color = piece.color;
+                        ChessMove rightMove = new ChessMove(piece.row, piece.file, piece.row + dir, piece.file - dir);
                         validMoves.Add(rightMove);
                     }
 
@@ -90,16 +89,40 @@ namespace ChessLib
                     // (prevent out of bounds)
                     if ((piece.file != 0 || dir > 0) &&
                         (piece.file != 7 || dir < 0) && 
-                        enemyPieces[curIndex + (dir * 9)])
+                        (enemyPieces[curIndex + (dir * 9)] ||
+                        (eP && enemyPieces[curIndex + dir])))
                     {
-                        ChessMove leftMove = new ChessMove();
-                        leftMove.srcRow = piece.row;
-                        leftMove.srcFile = piece.file;
-                        leftMove.destFile = piece.file + dir;
-                        leftMove.destRow = piece.row + dir;
-                        leftMove.Piece = ChessPieceType.Pawn;
-                        leftMove.Color = piece.color;
+                        ChessMove leftMove = new ChessMove(piece.row, piece.file, piece.row + dir, piece.file + dir);
                         validMoves.Add(leftMove);
+                    }
+
+                    foreach(ChessMove move in validMoves)
+                    {
+                        move.PieceType = ChessPieceType.Pawn;
+                        move.Color = piece.color;
+
+                        // Pawn promotion
+                        if (move.destRow == 0 ||  move.destRow == 7) 
+                        {
+                            move.Promotion = true;
+
+                            // Pick a random piece type for promotion
+                            switch (rand.Next(4))
+                            {
+                                case 0:
+                                    move.PromotionType = ChessPieceType.Knight;
+                                    break;
+                                case 1:
+                                    move.PromotionType = ChessPieceType.Bishop;
+                                    break;
+                                case 2:
+                                    move.PromotionType = ChessPieceType.Rook;
+                                    break;
+                                case 3:
+                                    move.PromotionType = ChessPieceType.Queen;
+                                    break;
+                            }
+                        }
                     }
                 }
                 else if (piece.type == ChessPieceType.Knight)
