@@ -82,12 +82,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChessBoardState.cs" />
     <Compile Include="ChessGameState.cs" />
+    <Compile Include="ChessPieceBishop.cs" />
+    <Compile Include="ChessPieceKing.cs" />
+    <Compile Include="ChessPieceKnight.cs" />
+    <Compile Include="ChessPiecePawn.cs" />
+    <Compile Include="ChessPieceQueen.cs" />
+    <Compile Include="ChessPieceRook.cs" />
     <Compile Include="ChessPlayer.cs" />
     <Compile Include="HumanChessMoveGenerator.cs" />
     <Compile Include="IChessGame.cs" />
     <Compile Include="IChessMoveGenerator.cs" />
-    <Compile Include="IChessPiece.cs" />
+    <Compile Include="ChessPiece.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandomChessMoveGenerator.cs" />
   </ItemGroup>

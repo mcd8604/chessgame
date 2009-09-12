@@ -143,29 +143,28 @@ namespace ChessGame
                     ChessPiece piece = gs.pieceGrid[file, row];
                     if(piece != null)
                     {
-                        ChessPieceType pType = piece.type;
                         string pieceString = string.Empty;
-                        if (pType == ChessPieceType.Pawn)
+                        if (piece is ChessPiecePawn)
                         {
                             pieceString = "P";
                         }
-                        else if (pType == ChessPieceType.Knight)
+                        else if (piece is ChessPieceKnight)
                         {
                             pieceString = "N";
                         }
-                        else if (pType == ChessPieceType.Bishop)
+                        else if (piece is ChessPieceBishop)
                         {
                             pieceString = "B";
                         }
-                        else if (pType == ChessPieceType.Rook)
+                        else if (piece is ChessPieceRook)
                         {
                             pieceString = "R";
                         }
-                        else if (pType == ChessPieceType.Queen)
+                        else if (piece is ChessPieceQueen)
                         {
                             pieceString = "Q";
                         }
-                        else if (pType == ChessPieceType.King)
+                        else if (piece is ChessPieceKing)
                         {
                             pieceString = "K";
                         }
