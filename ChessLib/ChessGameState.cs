@@ -39,13 +39,13 @@ namespace ChessLib
         public ChessPieceType PromotionType;
     }
 
-    public class ChessPiece
+    /*public class ChessPiece
     {
         public ChessPieceType type;
         public ChessColor color;
         public int row;
         public int file;
-    }
+    }*/
 
     public class ChessGameState
     {
@@ -254,51 +254,51 @@ namespace ChessLib
 
             for (int i = 0; i < 8; ++i)
             {
-                ChessPiece whitePawn = new ChessPiece();
+                ChessPiece whitePawn = new ChessPiecePawn();
                 whitePawn.color = ChessColor.White;
-                whitePawn.type = ChessPieceType.Pawn;
+                //whitePawn.type = ChessPieceType.Pawn;
                 whitePawn.row = 6;
                 whitePawn.file = i;
                 whitePieceList.Add(whitePawn);
                 pieceGrid[i, 6] = whitePawn;
 
-                ChessPiece blackPawn = new ChessPiece();
+                ChessPiece blackPawn = new ChessPiecePawn();
                 blackPawn.color = ChessColor.Black;
-                blackPawn.type = ChessPieceType.Pawn;
+                //blackPawn.type = ChessPieceType.Pawn;
                 blackPawn.row = 1;
                 blackPawn.file = i;
                 blackPieceList.Add(blackPawn);
                 pieceGrid[i, 1] = blackPawn;
 
-                ChessPiece whitePiece = new ChessPiece();
-                whitePiece.color = ChessColor.White;
+                ChessPiece whitePiece;
                 if (i == 0 || i == 7)
-                    whitePiece.type = ChessPieceType.Rook;
-                if (i == 1 || i == 6)
-                    whitePiece.type = ChessPieceType.Knight;
-                if (i == 2 || i == 5)
-                    whitePiece.type = ChessPieceType.Bishop;
-                if (i == 3)
-                    whitePiece.type = ChessPieceType.Queen;
-                if (i == 4)
-                    whitePiece.type = ChessPieceType.King;
+                    whitePiece = new ChessPieceRook();
+                else if (i == 1 || i == 6)
+                    whitePiece = new ChessPieceKnight();
+                else if (i == 2 || i == 5)
+                    whitePiece = new ChessPieceBishop();
+                else if (i == 3)
+                    whitePiece = new ChessPieceQueen();
+                else //if (i == 4)
+                    whitePiece = new ChessPieceKing();
+                whitePiece.color = ChessColor.White;
                 whitePiece.row = 7;
                 whitePiece.file = i;
                 whitePieceList.Add(whitePiece);
                 pieceGrid[i, 7] = whitePiece;
 
-                ChessPiece blackPiece = new ChessPiece();
-                blackPiece.color = ChessColor.Black;
+                ChessPiece blackPiece;
                 if (i == 0 || i == 7)
-                    blackPiece.type = ChessPieceType.Rook;
-                if (i == 1 || i == 6)
-                    blackPiece.type = ChessPieceType.Knight;
-                if (i == 2 || i == 5)
-                    blackPiece.type = ChessPieceType.Bishop;
-                if (i == 3)
-                    blackPiece.type = ChessPieceType.Queen;
-                if (i == 4)
-                    blackPiece.type = ChessPieceType.King;
+                    blackPiece = new ChessPieceRook();
+                else if (i == 1 || i == 6)
+                    blackPiece = new ChessPieceKnight();
+                else if (i == 2 || i == 5)
+                    blackPiece = new ChessPieceBishop();
+                else if (i == 3)
+                    blackPiece = new ChessPieceQueen();
+                else //if (i == 4)
+                    blackPiece = new ChessPieceKing();
+                blackPiece.color = ChessColor.Black;
                 blackPiece.row = 7;
                 blackPiece.file = i;
                 blackPieceList.Add(blackPiece);
@@ -473,8 +473,10 @@ namespace ChessLib
             ChessPiece piece = pieceGrid[move.srcFile, move.srcRow];
             piece.file = move.destFile;
             piece.row = move.destRow;
-            if (move.Promotion)
-                piece.type = move.PromotionType;
+            
+            // TODO: update promotion
+            //if (move.Promotion)
+                //piece.type = move.PromotionType;
 
             pieceGrid[move.destFile, move.destRow] = piece;
             pieceGrid[move.srcFile, move.srcRow] = null;   
