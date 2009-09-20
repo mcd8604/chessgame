@@ -14,7 +14,8 @@ namespace ChessLib
 
         public override List<ChessMove> GetValidMoves(ChessGameState state)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            return new List<ChessMove>();
         }
     }
 }

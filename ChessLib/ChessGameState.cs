@@ -49,6 +49,12 @@ namespace ChessLib
 
     public class ChessGameState
     {
+        private int curMoveIndex = -1;
+        public int CurMoveIndex
+        {
+            get { return curMoveIndex; }
+        }
+
         public List<ChessMove> moves;
         public List<ChessPiece> whitePieceList;
         public List<ChessPiece> blackPieceList;
@@ -214,6 +220,11 @@ namespace ChessLib
         public ChessGameState()
         {
             moves = new List<ChessMove>();
+            createNewBoardState();
+        }
+
+        private void createNewBoardState()
+        {
             whitePieceList = new List<ChessPiece>();
             blackPieceList = new List<ChessPiece>();
             pieceGrid = new ChessPiece[8, 8];
@@ -310,190 +321,217 @@ namespace ChessLib
 
         public bool AddMove(ChessMove move)
         {
-            if (move.srcRow < 0 || move.srcRow > 7 || move.srcFile < 0 || move.srcFile > 7 ||
-                move.destRow < 0 || move.destRow > 7 || move.destFile < 0 || move.destFile > 7)
-                throw new Exception("Move index out of bounds. Src Row: " +
-                    move.srcRow + ", Src File: " + move.srcFile + ", Dest Row: " +
-                    move.destRow + ", Dest File: " + move.destFile);
-
-            int srcIndex = move.srcRow * 8 + move.srcFile;
-            int destIndex = move.destRow * 8 + move.destFile;
-
-            //if (srcIndex < 0 || srcIndex > 63 || destIndex < 0 || destIndex > 63)
-            //    throw new Exception("Move index out of bounds. Src: " + srcIndex + ", Dest: " + destIndex);
-
-            // Check source index
-            if (pieceGrid[move.srcFile, move.srcRow] == null)
-                return false;
-
-            if (move.Color == ChessColor.White)
-            {
-                // Check destination index
-                if (WhitePieces[destIndex])
-                    // invalid move
-                    return false;
-
-                // Update source boards
-                if (move.PieceType == ChessPieceType.Pawn)
-                {
-                    wP[srcIndex] = false;
-                    if (!move.Promotion)
-                        wP[destIndex] = true;
-                    else
-                    {                        
-                        if (move.PromotionType == ChessPieceType.Knight)
-                            wN[destIndex] = true;
-                        else if (move.PromotionType == ChessPieceType.Bishop)
-                            wB[destIndex] = true;
-                        else if (move.PromotionType == ChessPieceType.Rook)
-                            wR[destIndex] = true;
-                        else if (move.PromotionType == ChessPieceType.Queen)
-                            wQ[destIndex] = true;
-                    }
-                }
-                else if (move.PieceType == ChessPieceType.Knight)
-                {
-                    wN[srcIndex] = false;
-                    wN[destIndex] = true;
-                }
-                else if (move.PieceType == ChessPieceType.Bishop)
-                {
-                    wB[srcIndex] = false;
-                    wB[destIndex] = true;
-                }
-                else if (move.PieceType == ChessPieceType.Rook)
-                {
-                    wR[srcIndex] = false;
-                    wR[destIndex] = true;
-                }
-                else if (move.PieceType == ChessPieceType.Queen)
-                {
-                    wQ[srcIndex] = false;
-                    wQ[destIndex] = true;
-                }
-                else if (move.PieceType == ChessPieceType.King)
-                {
-                    wK[srcIndex] = false;
-                    wK[destIndex] = true;
-                }
-
-                WhitePieces[srcIndex] = false;
-                WhitePieces[destIndex] = true;
-
-                // updated for captured piece
-
-                if (BlackPieces[destIndex])
-                {
-                    BlackPieces[destIndex] = false;
-                    bP[destIndex] = false;
-                    bN[destIndex] = false;
-                    bB[destIndex] = false;
-                    bR[destIndex] = false;
-                    bQ[destIndex] = false;
-
-                    blackPieceList.Remove(pieceGrid[move.destFile, move.destRow]);
-                }
-
-                CurMoveColor = ChessColor.Black;
-            }
-            else
-            {
-                // Check destination index
-                if (BlackPieces[destIndex])
-                    // invalid move
-                     return false;
-
-                // Update source boards
-                if (move.PieceType == ChessPieceType.Pawn)
-                {
-                    bP[srcIndex] = false;
-                    if (!move.Promotion)
-                        bP[destIndex] = true;
-                    else
-                    {
-                        if (move.PromotionType == ChessPieceType.Knight)
-                            bN[destIndex] = true;
-                        else if (move.PromotionType == ChessPieceType.Bishop)
-                            bB[destIndex] = true;
-                        else if (move.PromotionType == ChessPieceType.Rook)
-                            bR[destIndex] = true;
-                        else if (move.PromotionType == ChessPieceType.Queen)
-                            bQ[destIndex] = true;
-                    }
-                }
-                else if (move.PieceType == ChessPieceType.Knight)
-                {
-                    bN[srcIndex] = false;
-                    bN[destIndex] = true;
-                }
-                else if (move.PieceType == ChessPieceType.Bishop)
-                {
-                    bB[srcIndex] = false;
-                    bB[destIndex] = true;
-                }
-                else if (move.PieceType == ChessPieceType.Rook)
-                {
-                    bR[srcIndex] = false;
-                    bR[destIndex] = true;
-                }
-                else if (move.PieceType == ChessPieceType.Queen)
-                {
-                    bQ[srcIndex] = false;
-                    bQ[destIndex] = true;
-                }
-                else if (move.PieceType == ChessPieceType.King)
-                {
-                    bK[srcIndex] = false;
-                    bK[destIndex] = true;
-                }
-
-                BlackPieces[srcIndex] = false;
-                BlackPieces[destIndex] = true;
-
-                // updated for captured piece
-
-                if (WhitePieces[destIndex])
-                {
-                    WhitePieces[destIndex] = false;
-                    wP[destIndex] = false;
-                    wN[destIndex] = false;
-                    wB[destIndex] = false;
-                    wR[destIndex] = false;
-                    wQ[destIndex] = false;
-
-                    whitePieceList.Remove(pieceGrid[move.destFile, move.destRow]);
-                }
-                CurMoveColor = ChessColor.White;
-            }
-
-            AllPieces[srcIndex] = false;
-            AllPieces[destIndex] = true;
-
-            // Update piece and grid
-            ChessPiece piece = pieceGrid[move.srcFile, move.srcRow];
-            piece.file = move.destFile;
-            piece.row = move.destRow;
-            
-            // TODO: update promotion
-            //if (move.Promotion)
-                //piece.type = move.PromotionType;
-
-            pieceGrid[move.destFile, move.destRow] = piece;
-            pieceGrid[move.srcFile, move.srcRow] = null;   
-                     
-            // TODO: determine check/mate and validity
-
             moves.Add(move);
+
+            SetMove(moves.Count - 1);
 #if DEBUG
-            Console.WriteLine("--------------\n");
+            /*Console.WriteLine("--------------\n");
             Console.WriteLine("WHITE PAWNS:");
             PrintBitArray(wP);
             Console.WriteLine("BLACK PAWNS:");
-            PrintBitArray(bP);
+            PrintBitArray(bP);*/
 #endif
             return true;
         }
 
+        /// <summary>
+        /// Sets the board state to the move at moveIndex.
+        /// </summary>
+        /// <param name="moveIndex">The index of the move to set the board state.</param>
+        public void SetMove(int moveIndex)
+        {
+            if (moveIndex <= curMoveIndex)
+            {
+                // TODO: process moves in reverse.
+                // For now, just create a new board and reset the move index
+                createNewBoardState();
+                curMoveIndex = -1;
+            }
+
+            ChessMove move;
+            int destIndex;
+            int srcIndex;
+
+            // Process each move up to the given move index,
+            // starting from the current move.
+            for (int i = curMoveIndex + 1; i <= moveIndex; ++i)
+            {
+                move = moves[i];
+                    
+                if (move.srcRow < 0 || move.srcRow > 7 || move.srcFile < 0 || move.srcFile > 7 ||
+                    move.destRow < 0 || move.destRow > 7 || move.destFile < 0 || move.destFile > 7)
+                    throw new Exception("Move index out of bounds. Src Row: " +
+                        move.srcRow + ", Src File: " + move.srcFile + ", Dest Row: " +
+                        move.destRow + ", Dest File: " + move.destFile);
+
+                srcIndex = move.srcRow * 8 + move.srcFile;
+                destIndex = move.destRow * 8 + move.destFile;
+
+                //if (srcIndex < 0 || srcIndex > 63 || destIndex < 0 || destIndex > 63)
+                //    throw new Exception("Move index out of bounds. Src: " + srcIndex + ", Dest: " + destIndex);
+
+                // Check source index
+                if (pieceGrid[move.srcFile, move.srcRow] == null)
+                    throw new Exception("Invalid Chess Move.");
+
+                if (move.Color == ChessColor.White)
+                {
+                    // Check destination index
+                    if (WhitePieces[destIndex])
+                        throw new Exception("Invalid Chess Move.");
+
+                    // Update source boards
+                    if (move.PieceType == ChessPieceType.Pawn)
+                    {
+                        wP[srcIndex] = false;
+                        if (!move.Promotion)
+                            wP[destIndex] = true;
+                        else
+                        {
+                            if (move.PromotionType == ChessPieceType.Knight)
+                                wN[destIndex] = true;
+                            else if (move.PromotionType == ChessPieceType.Bishop)
+                                wB[destIndex] = true;
+                            else if (move.PromotionType == ChessPieceType.Rook)
+                                wR[destIndex] = true;
+                            else if (move.PromotionType == ChessPieceType.Queen)
+                                wQ[destIndex] = true;
+                        }
+                    }
+                    else if (move.PieceType == ChessPieceType.Knight)
+                    {
+                        wN[srcIndex] = false;
+                        wN[destIndex] = true;
+                    }
+                    else if (move.PieceType == ChessPieceType.Bishop)
+                    {
+                        wB[srcIndex] = false;
+                        wB[destIndex] = true;
+                    }
+                    else if (move.PieceType == ChessPieceType.Rook)
+                    {
+                        wR[srcIndex] = false;
+                        wR[destIndex] = true;
+                    }
+                    else if (move.PieceType == ChessPieceType.Queen)
+                    {
+                        wQ[srcIndex] = false;
+                        wQ[destIndex] = true;
+                    }
+                    else if (move.PieceType == ChessPieceType.King)
+                    {
+                        wK[srcIndex] = false;
+                        wK[destIndex] = true;
+                    }
+
+                    WhitePieces[srcIndex] = false;
+                    WhitePieces[destIndex] = true;
+
+                    // updated for captured piece
+
+                    if (BlackPieces[destIndex])
+                    {
+                        BlackPieces[destIndex] = false;
+                        bP[destIndex] = false;
+                        bN[destIndex] = false;
+                        bB[destIndex] = false;
+                        bR[destIndex] = false;
+                        bQ[destIndex] = false;
+
+                        blackPieceList.Remove(pieceGrid[move.destFile, move.destRow]);
+                    }
+
+                    CurMoveColor = ChessColor.Black;
+                }
+                else
+                {
+                    // Check destination index
+                    if (BlackPieces[destIndex])
+                        throw new Exception("Invalid Chess Move.");
+
+                    // Update source boards
+                    if (move.PieceType == ChessPieceType.Pawn)
+                    {
+                        bP[srcIndex] = false;
+                        if (!move.Promotion)
+                            bP[destIndex] = true;
+                        else
+                        {
+                            if (move.PromotionType == ChessPieceType.Knight)
+                                bN[destIndex] = true;
+                            else if (move.PromotionType == ChessPieceType.Bishop)
+                                bB[destIndex] = true;
+                            else if (move.PromotionType == ChessPieceType.Rook)
+                                bR[destIndex] = true;
+                            else if (move.PromotionType == ChessPieceType.Queen)
+                                bQ[destIndex] = true;
+                        }
+                    }
+                    else if (move.PieceType == ChessPieceType.Knight)
+                    {
+                        bN[srcIndex] = false;
+                        bN[destIndex] = true;
+                    }
+                    else if (move.PieceType == ChessPieceType.Bishop)
+                    {
+                        bB[srcIndex] = false;
+                        bB[destIndex] = true;
+                    }
+                    else if (move.PieceType == ChessPieceType.Rook)
+                    {
+                        bR[srcIndex] = false;
+                        bR[destIndex] = true;
+                    }
+                    else if (move.PieceType == ChessPieceType.Queen)
+                    {
+                        bQ[srcIndex] = false;
+                        bQ[destIndex] = true;
+                    }
+                    else if (move.PieceType == ChessPieceType.King)
+                    {
+                        bK[srcIndex] = false;
+                        bK[destIndex] = true;
+                    }
+
+                    BlackPieces[srcIndex] = false;
+                    BlackPieces[destIndex] = true;
+
+                    // updated for captured piece
+
+                    if (WhitePieces[destIndex])
+                    {
+                        WhitePieces[destIndex] = false;
+                        wP[destIndex] = false;
+                        wN[destIndex] = false;
+                        wB[destIndex] = false;
+                        wR[destIndex] = false;
+                        wQ[destIndex] = false;
+
+                        whitePieceList.Remove(pieceGrid[move.destFile, move.destRow]);
+                    }
+                    CurMoveColor = ChessColor.White;
+                }
+
+                AllPieces[srcIndex] = false;
+                AllPieces[destIndex] = true;
+
+                // Update piece and grid
+                ChessPiece piece = pieceGrid[move.srcFile, move.srcRow];
+                piece.file = move.destFile;
+                piece.row = move.destRow;
+
+                // TODO: update promotion
+                //if (move.Promotion)
+                //piece.type = move.PromotionType;
+
+                pieceGrid[move.destFile, move.destRow] = piece;
+                pieceGrid[move.srcFile, move.srcRow] = null;
+
+                // TODO: determine check/mate and validity
+
+                curMoveIndex = moveIndex;
+            }
+        }
 
 #if DEBUG
         private void PrintBitArray(BitArray ba)

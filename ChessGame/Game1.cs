@@ -107,6 +107,20 @@ namespace ChessGame
             if (lastState.IsKeyDown(Keys.Space) && curState.IsKeyUp(Keys.Space))
                 p.MakeMove(gs);
 
+            if (lastState.IsKeyDown(Keys.Left) && curState.IsKeyUp(Keys.Left))
+            {
+                int moveIndex = gs.CurMoveIndex;
+                if (moveIndex > 0)
+                    gs.SetMove(moveIndex - 1);
+            }
+
+            if (lastState.IsKeyDown(Keys.Right) && curState.IsKeyUp(Keys.Right))
+            {
+                int moveIndex = gs.CurMoveIndex;
+                if (moveIndex < gs.moves.Count - 1)
+                    gs.SetMove(moveIndex + 1);
+            }
+
             lastState = curState;
 
             base.Update(gameTime);
