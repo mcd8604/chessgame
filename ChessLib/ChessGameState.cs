@@ -8,6 +8,7 @@ namespace ChessLib
 {
     public enum ChessColor
     {
+        None,
         White,
         Black
     }
@@ -520,9 +521,41 @@ namespace ChessLib
                 piece.file = move.destFile;
                 piece.row = move.destRow;
 
-                // TODO: update promotion
-                //if (move.Promotion)
-                //piece.type = move.PromotionType;
+                // Create promoted piece
+                if (move.Promotion)
+                {
+                    ChessPiece promotedPiece = null;
+                    switch (move.PromotionType)
+                    {
+                        case ChessPieceType.Knight:
+                            promotedPiece = new ChessPieceKnight();
+                            break;
+                        case ChessPieceType.Bishop:
+                            promotedPiece = new ChessPieceBishop();
+                            break;
+                        case ChessPieceType.Rook:
+                            promotedPiece = new ChessPieceRook();
+                            break;
+                        case ChessPieceType.Queen:
+                            promotedPiece = new ChessPieceQueen();
+                            break;
+                    }
+                    promotedPiece.color = piece.color;
+                    promotedPiece.file = piece.file;
+                    promotedPiece.row = piece.row;
+                    piece = promotedPiece;
+
+                    if (piece.color == ChessColor.Black)
+                    {
+                        blackPieceList.Remove(piece);
+                        blackPieceList.Add(promotedPiece);
+                    }
+                    else if (piece.color == ChessColor.White)
+                    {
+                        whitePieceList.Remove(piece);
+                        whitePieceList.Add(promotedPiece);
+                    }
+                }
 
                 pieceGrid[move.destFile, move.destRow] = piece;
                 pieceGrid[move.srcFile, move.srcRow] = null;

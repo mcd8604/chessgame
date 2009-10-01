@@ -30,6 +30,9 @@ namespace ChessLib
             {
                 // Select a piece at random
                 ChessPiece piece = pieceList[rand.Next(pieceList.Count)];
+                
+                if (piece.color != state.CurMoveColor)
+                    throw new Exception("Invalid Piece Color");
 
                 // Determine valid moves for the piece type
                 List<ChessMove> validMoves = piece.GetValidMoves(state);               
