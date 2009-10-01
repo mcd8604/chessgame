@@ -8,7 +8,6 @@ namespace ChessLib
 {
     public enum ChessColor
     {
-        None,
         White,
         Black
     }
@@ -543,7 +542,6 @@ namespace ChessLib
                     promotedPiece.color = piece.color;
                     promotedPiece.file = piece.file;
                     promotedPiece.row = piece.row;
-                    piece = promotedPiece;
 
                     if (piece.color == ChessColor.Black)
                     {
@@ -555,6 +553,8 @@ namespace ChessLib
                         whitePieceList.Remove(piece);
                         whitePieceList.Add(promotedPiece);
                     }
+
+                    piece = promotedPiece;
                 }
 
                 pieceGrid[move.destFile, move.destRow] = piece;
