@@ -38,7 +38,7 @@ namespace ChessLib
             if (file < 7 && row < 6
                 && !allyBoard[curIndex + 17])
             {
-                ChessMove move = new ChessMove(row, file, row, file);
+                ChessMove move = new ChessMove(row, file, row + 2, file + 1);
                 validMoves.Add(move);
             }
 
@@ -89,6 +89,9 @@ namespace ChessLib
                 ChessMove move = new ChessMove(row, file, row - 1, file + 2);
                 validMoves.Add(move);
             }
+
+            foreach (ChessMove move in validMoves)
+                move.PieceType = ChessPieceType.Knight;
 
             return validMoves;
         }

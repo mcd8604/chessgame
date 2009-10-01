@@ -39,7 +39,6 @@ namespace ChessLib
 
                 foreach (ChessMove move in validMoves)
                 {
-                    move.PieceType = ChessPieceType.Pawn;
                     move.Color = piece.color;
 
                     // Pawn promotion
