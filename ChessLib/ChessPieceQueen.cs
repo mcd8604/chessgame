@@ -5,17 +5,35 @@ using System.Text;
 
 namespace ChessLib
 {
-    public class ChessPieceQueen : ChessPiece
+    public class ChessPieceQueen : ChessPieceSlider
     {
-        public override bool CanMove(int row, int file)
+        public ChessPieceQueen()
+            : base()
         {
-            throw new NotImplementedException();
-        }
+            // 8 directions for a Queen
+            rowDirs.Add(1);
+            fileDirs.Add(1);
 
-        public override List<ChessMove> GetValidMoves(ChessGameState state)
-        {
-            //throw new NotImplementedException();
-            return new List<ChessMove>();
+            rowDirs.Add(-1);
+            fileDirs.Add(1);
+
+            rowDirs.Add(1);
+            fileDirs.Add(-1);
+
+            rowDirs.Add(-1);
+            fileDirs.Add(-1);
+
+            rowDirs.Add(0);
+            fileDirs.Add(1);
+
+            rowDirs.Add(1);
+            fileDirs.Add(0);
+
+            rowDirs.Add(0);
+            fileDirs.Add(-1);
+
+            rowDirs.Add(-1);
+            fileDirs.Add(0);
         }
     }
 }

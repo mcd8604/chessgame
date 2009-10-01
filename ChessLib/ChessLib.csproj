@@ -89,6 +89,7 @@
     <Compile Include="ChessPiecePawn.cs" />
     <Compile Include="ChessPieceQueen.cs" />
     <Compile Include="ChessPieceRook.cs" />
+    <Compile Include="ChessPieceSlider.cs" />
     <Compile Include="ChessPlayer.cs" />
     <Compile Include="HumanChessMoveGenerator.cs" />
     <Compile Include="IChessGame.cs" />
