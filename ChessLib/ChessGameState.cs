@@ -58,6 +58,8 @@ namespace ChessLib
         public List<ChessMove> moves;
         public List<ChessPiece> whitePieceList;
         public List<ChessPiece> blackPieceList;
+        public ChessPieceKing whiteKing;
+        public ChessPieceKing blackKing;
         public ChessPiece[,] pieceGrid;
         public ChessColor CurMoveColor;
 
@@ -324,6 +326,14 @@ namespace ChessLib
             moves.Add(move);
 
             SetMove(moves.Count - 1);
+
+            // check validity
+            // TODO: optimization test - order of operations
+            if (move.Color == ChessColor.White && whiteKing.IsInCheck(this) || blackKing.IsInCheck(this))
+            {
+                moves.RemoveAt(moves.Count - 1);
+                return false;
+            }
 #if DEBUG
             /*Console.WriteLine("--------------\n");
             Console.WriteLine("WHITE PAWNS:");
@@ -562,9 +572,11 @@ namespace ChessLib
 
                 // TODO: determine check/mate and validity
 
+
                 curMoveIndex = moveIndex;
             }
         }
+
 
 #if DEBUG
         private void PrintBitArray(BitArray ba)
