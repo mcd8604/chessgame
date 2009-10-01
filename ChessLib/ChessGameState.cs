@@ -310,7 +310,7 @@ namespace ChessLib
                 else //if (i == 4)
                     blackPiece = new ChessPieceKing();
                 blackPiece.color = ChessColor.Black;
-                blackPiece.row = 7;
+                blackPiece.row = 0;
                 blackPiece.file = i;
                 blackPieceList.Add(blackPiece);
                 pieceGrid[i, 0] = blackPiece;

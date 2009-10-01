@@ -110,7 +110,7 @@ namespace ChessGame
             if (lastState.IsKeyDown(Keys.Left) && curState.IsKeyUp(Keys.Left))
             {
                 int moveIndex = gs.CurMoveIndex;
-                if (moveIndex > 0)
+                if (moveIndex >= 0)
                     gs.SetMove(moveIndex - 1);
             }
 

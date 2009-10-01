@@ -82,7 +82,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChessBoardState.cs" />
     <Compile Include="ChessGameState.cs" />
     <Compile Include="ChessPieceBishop.cs" />
     <Compile Include="ChessPieceKing.cs" />
