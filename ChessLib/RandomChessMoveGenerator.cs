@@ -30,6 +30,9 @@ namespace ChessLib
             {
                 // Select a piece at random
                 ChessPiece piece = pieceList[rand.Next(pieceList.Count)];
+
+                if (state.pieceGrid[piece.file, piece.row] != piece)
+                    throw new Exception("Invalid Chess Move.");
                 
                 if (piece.color != state.CurMoveColor)
                     throw new Exception("Invalid Piece Color");
@@ -71,7 +74,11 @@ namespace ChessLib
                 // Pick a valid move at random
                 if (validMoves.Count > 0)
                 {
-                    valid = state.AddMove(validMoves[rand.Next(validMoves.Count)]);
+                    ChessMove m = validMoves[rand.Next(validMoves.Count)];
+#if DEBUG
+                    m.DebugPiece = piece;
+#endif
+                    valid = state.AddMove(m);
                 }
             }
 

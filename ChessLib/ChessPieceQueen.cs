@@ -10,6 +10,8 @@ namespace ChessLib
         public ChessPieceQueen()
             : base()
         {
+            type = ChessPieceType.Queen;
+
             // 8 directions for a Queen
             rowDirs.Add(1);
             fileDirs.Add(1);

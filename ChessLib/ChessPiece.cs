@@ -7,7 +7,7 @@ namespace ChessLib
 {
     public abstract class ChessPiece
     {
-        //public ChessPieceType type;
+        public ChessPieceType type;
         public ChessColor color;
         public int row;
         public int file;
