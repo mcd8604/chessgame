@@ -16,19 +16,16 @@ namespace ChessLib
         {
             List<ChessPiece> pieceList;
 
-            if (state.CurMoveColor == ChessColor.White)
-            {
-                pieceList = state.whitePieceList;
-            }
-            else
-            {
-                pieceList = state.blackPieceList;
-            }
-
             bool valid = false;
             while (!valid)
             {
                 // Select a piece at random
+
+                if (state.CurMoveColor == ChessColor.White)
+                    pieceList = state.whitePieceList;
+                else
+                    pieceList = state.blackPieceList;
+
                 ChessPiece piece = pieceList[rand.Next(pieceList.Count)];
 
                 if (state.pieceGrid[piece.file, piece.row] != piece)
