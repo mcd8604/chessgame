@@ -103,7 +103,7 @@ namespace ChessLib
                     validMoves.Add(move);
                 }
 
-                if (fLT7 && !allyPieces[curIndex + 8])
+                if (fLT7 && !allyPieces[curIndex + 9])
                 {
                     ChessMove move = new ChessMove(row, file, row + 1, file + 1);
                     move.Color = color;
