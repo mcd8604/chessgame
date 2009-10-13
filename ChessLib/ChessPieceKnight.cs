@@ -8,6 +8,11 @@ namespace ChessLib
 {
     public class ChessPieceKnight : ChessPiece
     {
+        public ChessPieceKnight()
+        {
+            type = ChessPieceType.Knight;
+        }
+
         public override bool CanMove(int row, int file)
         {
             throw new NotImplementedException();

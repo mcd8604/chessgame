@@ -132,6 +132,7 @@ namespace ChessGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
+            p.MakeMove(gs);
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // Draw Board

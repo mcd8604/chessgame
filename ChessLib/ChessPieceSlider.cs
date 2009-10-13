@@ -58,7 +58,7 @@ namespace ChessLib
                     {
                         ChessMove move = new ChessMove(row, file, curRow, curFile);
                         move.Color = color;
-                        move.PieceType = ChessPieceType.Bishop;
+                        move.PieceType = type;
                         validMoves.Add(move);
                         if (enemyPieces[curIndex])
                             break;

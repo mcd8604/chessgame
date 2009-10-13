@@ -37,6 +37,20 @@ namespace ChessLib
         public bool EnPassant;
         public bool Promotion;
         public ChessPieceType PromotionType;
+#if DEBUG
+        public ChessPiece DebugPiece;
+#endif
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Color: " + Enum.GetName(typeof(ChessColor), Color));
+            sb.AppendLine("Piece Type: " + Enum.GetName(typeof(ChessPieceType), PieceType));
+            sb.AppendLine("Source File: " + srcFile);
+            sb.AppendLine("Source Row: " + srcRow);
+            sb.AppendLine("Destination File: " + destFile);
+            sb.AppendLine("Destination Row: " + destRow);
+            return sb.ToString();
+        }
     }
 
     /*public class ChessPiece
@@ -293,7 +307,10 @@ namespace ChessLib
                 else if (i == 3)
                     whitePiece = new ChessPieceQueen();
                 else //if (i == 4)
+                {
                     whitePiece = new ChessPieceKing();
+                    whiteKing = whitePiece as ChessPieceKing;
+                }
                 whitePiece.color = ChessColor.White;
                 whitePiece.row = 7;
                 whitePiece.file = i;
@@ -310,7 +327,10 @@ namespace ChessLib
                 else if (i == 3)
                     blackPiece = new ChessPieceQueen();
                 else //if (i == 4)
+                {
                     blackPiece = new ChessPieceKing();
+                    blackKing = blackPiece as ChessPieceKing;
+                }
                 blackPiece.color = ChessColor.Black;
                 blackPiece.row = 0;
                 blackPiece.file = i;
@@ -331,7 +351,9 @@ namespace ChessLib
             // TODO: optimization test - order of operations
             if (move.Color == ChessColor.White && whiteKing.IsInCheck(this) || blackKing.IsInCheck(this))
             {
+                // undo the move
                 moves.RemoveAt(moves.Count - 1);
+                SetMove(moves.Count - 1);
                 return false;
             }
 #if DEBUG
@@ -381,6 +403,7 @@ namespace ChessLib
                 //    throw new Exception("Move index out of bounds. Src: " + srcIndex + ", Dest: " + destIndex);
 
                 // Check source index
+
                 if (pieceGrid[move.srcFile, move.srcRow] == null)
                     throw new Exception("Invalid Chess Move.");
 
@@ -527,6 +550,19 @@ namespace ChessLib
 
                 // Update piece and grid
                 ChessPiece piece = pieceGrid[move.srcFile, move.srcRow];
+                if (piece is ChessPieceKing)
+                {
+                    if (piece.color == ChessColor.White)
+                    {
+                        if (piece != whiteKing)
+                        { }
+                    }
+                    else
+                    {
+                        if (piece != blackKing)
+                        { }
+                    }
+                }
                 piece.file = move.destFile;
                 piece.row = move.destRow;
 
@@ -565,13 +601,15 @@ namespace ChessLib
                     }
 
                     piece = promotedPiece;
+
+                    // TODO: Update bitboards for old/new pieces
                 }
 
                 pieceGrid[move.destFile, move.destRow] = piece;
                 pieceGrid[move.srcFile, move.srcRow] = null;
 
-                // TODO: determine check/mate and validity
-
+                if (piece.row != move.destRow || piece.file != move.destFile)
+                    throw new Exception();
 
                 curMoveIndex = moveIndex;
             }

@@ -10,6 +10,8 @@ namespace ChessLib
         public ChessPieceRook()
             : base()
         {
+            type = ChessPieceType.Rook;
+
             // 4 directions for a Rook
             rowDirs.Add(0);
             fileDirs.Add(1);
