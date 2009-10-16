@@ -115,7 +115,7 @@ namespace ChessLib
             return validMoves;
         }
 
-        public bool IsInCheck(ChessGameState state)
+        /*public bool IsInCheck(ChessGameState state)
         {            
             bool inCheck = false;
 
@@ -135,6 +135,7 @@ namespace ChessLib
             BitArray enemyBishops;
             BitArray enemyRooks;
             BitArray enemyQueens;
+            BitArray enemyAttacks;
 
             if(color == ChessColor.White)
             {
@@ -149,6 +150,8 @@ namespace ChessLib
                 enemyBishops = state.bB;
                 enemyRooks = state.bR;
                 enemyQueens = state.bQ;
+                enemyAttacks = state.BlackAttacks;
+
             }
             else
             {
@@ -163,6 +166,7 @@ namespace ChessLib
                 enemyBishops = state.wB;
                 enemyRooks = state.wR;
                 enemyQueens = state.wQ;
+                enemyAttacks = state.WhiteAttacks;
             }
             
             // validate against knights
@@ -181,7 +185,7 @@ namespace ChessLib
 
             // validate against rooks (and queens)
 
-            return inCheck;
-        }
+            return enemyAttacks[kingIndex];
+        }*/
     }
 }

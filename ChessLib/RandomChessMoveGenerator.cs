@@ -14,17 +14,18 @@ namespace ChessLib
 
         public bool GenerateMove(ChessGameState state)
         {
-            List<ChessPiece> pieceList;
+            List<ChessPiece> pieceList = new List<ChessPiece>();
 
             bool valid = false;
             while (!valid)
             {
                 // Select a piece at random
-
+                // TODO: exclude pieces with no valid moves, check for stalemate
+                pieceList.Clear();
                 if (state.CurMoveColor == ChessColor.White)
-                    pieceList = state.whitePieceList;
+                    pieceList.AddRange(state.whitePieceList);
                 else
-                    pieceList = state.blackPieceList;
+                    pieceList.AddRange(state.blackPieceList);
 
                 ChessPiece piece = pieceList[rand.Next(pieceList.Count)];
 

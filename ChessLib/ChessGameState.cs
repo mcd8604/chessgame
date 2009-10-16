@@ -40,6 +40,8 @@ namespace ChessLib
 #if DEBUG
         public ChessPiece DebugPiece;
 #endif
+        public bool Capture;
+        public ChessPieceType CaptureType;
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -76,12 +78,15 @@ namespace ChessLib
         public ChessPieceKing blackKing;
         public ChessPiece[,] pieceGrid;
         public ChessColor CurMoveColor;
+        public bool IsInCheck;
 
         // Store a BitArray for each piece type and color.
         public BitArray wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK;
 
         public BitArray WhitePieces;
+        public BitArray WhiteAttacks;
         public BitArray BlackPieces;
+        public BitArray BlackAttacks;
         public BitArray AllPieces;
 
 #region Default piece sets for new game
@@ -158,6 +163,18 @@ namespace ChessLib
             false, false, false, false, true, false, false, false
         };
 
+        private static readonly bool[] DEFAULT_WHITE_ATTACKS = 
+        {
+            false, false, false, false, false, false, false, false, 
+            false, false, false, false, false, false, false, false, 
+            false, false, false, false, false, false, false, false, 
+            false, false, false, false, false, false, false, false, 
+            false, false, false, false, false, false, false, false, 
+            true, true, true, true, true, true, true, true, 
+            false, false, false, false, false, false, false, false, 
+            false, false, false, false, false, false, false, false
+        };
+
 
         private static readonly bool[] DEFAULT_BLACK_PAWNS = 
         {
@@ -231,6 +248,18 @@ namespace ChessLib
             false, false, false, false, false, false, false, false
         };
 
+        private static readonly bool[] DEFAULT_BLACK_ATTACKS = 
+        {
+            false, false, false, false, false, false, false, false, 
+            false, false, false, false, false, false, false, false, 
+            true, true, true, true, true, true, true, true,
+            false, false, false, false, false, false, false, false, 
+            false, false, false, false, false, false, false, false, 
+            false, false, false, false, false, false, false, false, 
+            false, false, false, false, false, false, false, false, 
+            false, false, false, false, false, false, false, false
+        };
+
 #endregion
 
         public ChessGameState()
@@ -259,6 +288,7 @@ namespace ChessLib
             WhitePieces.Or(wR);
             WhitePieces.Or(wQ);
             WhitePieces.Or(wK);
+            WhiteAttacks = new BitArray(DEFAULT_WHITE_ATTACKS);
 
             bP = new BitArray(DEFAULT_BLACK_PAWNS);
             bN = new BitArray(DEFAULT_BLACK_KNIGHTS);
@@ -274,6 +304,7 @@ namespace ChessLib
             BlackPieces.Or(bR);
             BlackPieces.Or(bQ);
             BlackPieces.Or(bK);
+            BlackAttacks = new BitArray(DEFAULT_BLACK_ATTACKS);
 
             AllPieces = new BitArray(64);
             AllPieces.Or(WhitePieces);
@@ -283,7 +314,6 @@ namespace ChessLib
             {
                 ChessPiece whitePawn = new ChessPiecePawn();
                 whitePawn.color = ChessColor.White;
-                //whitePawn.type = ChessPieceType.Pawn;
                 whitePawn.row = 6;
                 whitePawn.file = i;
                 whitePieceList.Add(whitePawn);
@@ -291,7 +321,6 @@ namespace ChessLib
 
                 ChessPiece blackPawn = new ChessPiecePawn();
                 blackPawn.color = ChessColor.Black;
-                //blackPawn.type = ChessPieceType.Pawn;
                 blackPawn.row = 1;
                 blackPawn.file = i;
                 blackPieceList.Add(blackPawn);
@@ -308,8 +337,8 @@ namespace ChessLib
                     whitePiece = new ChessPieceQueen();
                 else //if (i == 4)
                 {
-                    whitePiece = new ChessPieceKing();
-                    whiteKing = whitePiece as ChessPieceKing;
+                    whiteKing = new ChessPieceKing();
+                    whitePiece = whiteKing;
                 }
                 whitePiece.color = ChessColor.White;
                 whitePiece.row = 7;
@@ -328,8 +357,8 @@ namespace ChessLib
                     blackPiece = new ChessPieceQueen();
                 else //if (i == 4)
                 {
-                    blackPiece = new ChessPieceKing();
-                    blackKing = blackPiece as ChessPieceKing;
+                    blackKing = new ChessPieceKing();
+                    blackPiece = blackKing;
                 }
                 blackPiece.color = ChessColor.Black;
                 blackPiece.row = 0;
@@ -349,13 +378,23 @@ namespace ChessLib
 
             // check validity
             // TODO: optimization test - order of operations
-            if (move.Color == ChessColor.White && whiteKing.IsInCheck(this) || blackKing.IsInCheck(this))
+            //if (move.Color == ChessColor.White && whiteKing.IsInCheck(this) || blackKing.IsInCheck(this))
+            bool whiteInCheck = BlackAttacks[whiteKing.row * 8 + whiteKing.file];
+            bool blackInCheck = WhiteAttacks[blackKing.row * 8 + blackKing.file];
+            
+            // Deny the move if it puts that color's king in check 
+            if((move.Color == ChessColor.White && whiteInCheck) || 
+                (move.Color == ChessColor.Black && blackInCheck))
             {
+                PrintBitArray(WhiteAttacks);
                 // undo the move
+                moveBackward();
                 moves.RemoveAt(moves.Count - 1);
-                SetMove(moves.Count - 1);
+                //SetMove(moves.Count - 1);
                 return false;
             }
+
+            IsInCheck = whiteInCheck || blackInCheck;
 #if DEBUG
             /*Console.WriteLine("--------------\n");
             Console.WriteLine("WHITE PAWNS:");
@@ -373,47 +412,51 @@ namespace ChessLib
         public void SetMove(int moveIndex)
         {
             if (moveIndex <= curMoveIndex)
-            {
-                // TODO: process moves in reverse.
-                // For now, just create a new board and reset the move index
-                createNewBoardState();
-                curMoveIndex = -1;
-            }
+                for (int i = curMoveIndex; i > moveIndex; ++i)
+                    moveBackward();
+            else
+                for (int i = curMoveIndex; i < moveIndex; ++i)
+                    moveForward();
+        }
 
-            ChessMove move;
-            int destIndex;
-            int srcIndex;
-
-            // Process each move up to the given move index,
-            // starting from the current move.
-            for (int i = curMoveIndex + 1; i <= moveIndex; ++i)
+        private void moveForward()
+        {
+            if (curMoveIndex < moves.Count)
             {
-                move = moves[i];
-                    
-                if (move.srcRow < 0 || move.srcRow > 7 || move.srcFile < 0 || move.srcFile > 7 ||
-                    move.destRow < 0 || move.destRow > 7 || move.destFile < 0 || move.destFile > 7)
+                ChessMove move = moves[curMoveIndex + 1];
+
+                int srcRow = move.srcRow;
+                int srcFile = move.srcFile;
+
+                int destRow = move.destRow;
+                int destFile = move.destFile;
+
+                int srcIndex = srcRow * 8 + srcFile;
+                int destIndex = destRow * 8 + destFile;
+                
+#if DEBUG
+                // Index out-of-bounds check
+                if (srcRow < 0 || srcRow > 7 || srcFile < 0 || srcFile > 7 ||
+                    destRow < 0 || destRow > 7 || destFile < 0 || destFile > 7)
                     throw new Exception("Move index out of bounds. Src Row: " +
-                        move.srcRow + ", Src File: " + move.srcFile + ", Dest Row: " +
-                        move.destRow + ", Dest File: " + move.destFile);
-
-                srcIndex = move.srcRow * 8 + move.srcFile;
-                destIndex = move.destRow * 8 + move.destFile;
+                        srcRow + ", Src File: " + srcFile + ", Dest Row: " +
+                        destRow + ", Dest File: " + destFile);
 
                 //if (srcIndex < 0 || srcIndex > 63 || destIndex < 0 || destIndex > 63)
                 //    throw new Exception("Move index out of bounds. Src: " + srcIndex + ", Dest: " + destIndex);
-
+                
                 // Check source index
-
-                if (pieceGrid[move.srcFile, move.srcRow] == null)
+                if (pieceGrid[srcFile, srcRow] == null)
                     throw new Exception("Invalid Chess Move.");
-
+#endif
                 if (move.Color == ChessColor.White)
                 {
                     // Check destination index
+#if DEBUG
                     if (WhitePieces[destIndex])
                         throw new Exception("Invalid Chess Move.");
-
-                    // Update source boards
+#endif
+                    // Update white bitboards
                     if (move.PieceType == ChessPieceType.Pawn)
                     {
                         wP[srcIndex] = false;
@@ -460,10 +503,14 @@ namespace ChessLib
                     WhitePieces[srcIndex] = false;
                     WhitePieces[destIndex] = true;
 
-                    // updated for captured piece
+                    // Remove captured black piece
 
                     if (BlackPieces[destIndex])
                     {
+#if DEBUG
+                        if (bK[destIndex])
+                            throw new Exception("Attempted to capture black King");
+#endif
                         BlackPieces[destIndex] = false;
                         bP[destIndex] = false;
                         bN[destIndex] = false;
@@ -471,18 +518,22 @@ namespace ChessLib
                         bR[destIndex] = false;
                         bQ[destIndex] = false;
 
-                        blackPieceList.Remove(pieceGrid[move.destFile, move.destRow]);
+                        ChessPiece capturedPiece = pieceGrid[destFile, destRow];
+                        move.CaptureType = capturedPiece.type;
+                        blackPieceList.Remove(capturedPiece);
                     }
 
                     CurMoveColor = ChessColor.Black;
                 }
                 else
                 {
+#if DEBUG
                     // Check destination index
                     if (BlackPieces[destIndex])
                         throw new Exception("Invalid Chess Move.");
+#endif
+                    // Update black bitboards
 
-                    // Update source boards
                     if (move.PieceType == ChessPieceType.Pawn)
                     {
                         bP[srcIndex] = false;
@@ -529,10 +580,16 @@ namespace ChessLib
                     BlackPieces[srcIndex] = false;
                     BlackPieces[destIndex] = true;
 
-                    // updated for captured piece
+                    // Remove captured white piece
 
                     if (WhitePieces[destIndex])
                     {
+#if DEBUG
+                        if (wK[destIndex])
+                            throw new Exception("Attempted to capture white King");
+#endif 
+                        move.Capture = true;
+
                         WhitePieces[destIndex] = false;
                         wP[destIndex] = false;
                         wN[destIndex] = false;
@@ -540,7 +597,9 @@ namespace ChessLib
                         wR[destIndex] = false;
                         wQ[destIndex] = false;
 
-                        whitePieceList.Remove(pieceGrid[move.destFile, move.destRow]);
+                        ChessPiece capturedPiece = pieceGrid[destFile, destRow];
+                        move.CaptureType = capturedPiece.type;
+                        whitePieceList.Remove(capturedPiece);
                     }
                     CurMoveColor = ChessColor.White;
                 }
@@ -548,25 +607,10 @@ namespace ChessLib
                 AllPieces[srcIndex] = false;
                 AllPieces[destIndex] = true;
 
-                // Update piece and grid
-                ChessPiece piece = pieceGrid[move.srcFile, move.srcRow];
-                if (piece is ChessPieceKing)
-                {
-                    if (piece.color == ChessColor.White)
-                    {
-                        if (piece != whiteKing)
-                        { }
-                    }
-                    else
-                    {
-                        if (piece != blackKing)
-                        { }
-                    }
-                }
-                piece.file = move.destFile;
-                piece.row = move.destRow;
+                ChessPiece piece = pieceGrid[srcFile, srcRow];
 
-                // Create promoted piece
+                // Promote piece
+
                 if (move.Promotion)
                 {
                     ChessPiece promotedPiece = null;
@@ -586,8 +630,6 @@ namespace ChessLib
                             break;
                     }
                     promotedPiece.color = piece.color;
-                    promotedPiece.file = piece.file;
-                    promotedPiece.row = piece.row;
 
                     if (piece.color == ChessColor.Black)
                     {
@@ -601,20 +643,292 @@ namespace ChessLib
                     }
 
                     piece = promotedPiece;
-
-                    // TODO: Update bitboards for old/new pieces
                 }
+                
+                // Update piece location
 
-                pieceGrid[move.destFile, move.destRow] = piece;
-                pieceGrid[move.srcFile, move.srcRow] = null;
+                piece.file = destFile;
+                piece.row = destRow;
 
-                if (piece.row != move.destRow || piece.file != move.destFile)
-                    throw new Exception();
+                // Update grid
 
-                curMoveIndex = moveIndex;
+                pieceGrid[destFile, destRow] = piece;
+                pieceGrid[srcFile, srcRow] = null;
+
+                updateAttackBoards();
+
+                ++curMoveIndex;
             }
         }
 
+        private void moveBackward()
+        {
+            if (curMoveIndex > 0)
+            {
+                ChessMove move = moves[curMoveIndex];
+
+                int srcRow = move.srcRow;
+                int srcFile = move.srcFile;
+
+                int destRow = move.destRow;
+                int destFile = move.destFile;
+
+                int srcIndex = srcRow * 8 + srcFile;
+                int destIndex = destRow * 8 + destFile;
+
+                ChessPiece piece = pieceGrid[destFile, destRow];
+#if DEBUG
+                if (piece != move.DebugPiece)
+                    throw new Exception("Invalid Piece");
+#endif
+                // Demote and update piece
+
+                if (move.Promotion)
+                {
+                    ChessPiecePawn demotedPawn = new ChessPiecePawn();
+                    demotedPawn.file = srcFile;
+                    demotedPawn.row = srcRow;
+                    demotedPawn.color = piece.color;
+
+                    if (piece.color == ChessColor.Black)
+                    {
+                        blackPieceList.Remove(piece);
+                        blackPieceList.Add(demotedPawn);
+                    }
+                    else
+                    {
+                        whitePieceList.Remove(piece);
+                        whitePieceList.Add(demotedPawn);
+                    }
+
+                    piece = demotedPawn;
+                }
+                else
+                {
+                    piece.file = srcFile;
+                    piece.row = srcRow;
+                }
+
+                // Update grid
+#if DEBUG
+                if (pieceGrid[srcFile, srcRow] != null)
+                    throw new Exception("Piece should not exist in grid square");
+#endif
+                pieceGrid[srcFile, srcRow] = piece;
+
+                if (move.Color == ChessColor.White)
+                {
+                    // Update white bitboards
+
+                    if (move.PieceType == ChessPieceType.Pawn)
+                    {
+                        wP[srcIndex] = true;
+                        if (!move.Promotion)
+                            wP[destIndex] = false;
+                        else
+                        {
+                            if (move.PromotionType == ChessPieceType.Knight)
+                                wN[destIndex] = false;
+                            else if (move.PromotionType == ChessPieceType.Bishop)
+                                wB[destIndex] = false;
+                            else if (move.PromotionType == ChessPieceType.Rook)
+                                wR[destIndex] = false;
+                            else if (move.PromotionType == ChessPieceType.Queen)
+                                wQ[destIndex] = false;
+                        }
+                    }
+                    else if (move.PieceType == ChessPieceType.Knight)
+                    {
+                        wN[srcIndex] = true;
+                        wN[destIndex] = false;
+                    }
+                    else if (move.PieceType == ChessPieceType.Bishop)
+                    {
+                        wB[srcIndex] = true;
+                        wB[destIndex] = false;
+                    }
+                    else if (move.PieceType == ChessPieceType.Rook)
+                    {
+                        wR[srcIndex] = true;
+                        wR[destIndex] = false;
+                    }
+                    else if (move.PieceType == ChessPieceType.Queen)
+                    {
+                        wQ[srcIndex] = true;
+                        wQ[destIndex] = false;
+                    }
+                    else if (move.PieceType == ChessPieceType.King)
+                    {
+                        wK[srcIndex] = true;
+                        wK[destIndex] = false;
+                    }
+
+                    WhitePieces[srcIndex] = true;
+                    WhitePieces[destIndex] = false;
+
+                    // Restore captured black piece
+
+                    if (move.Capture)
+                    {
+                        ChessPiece capturedPiece = null;
+                        if (move.CaptureType == ChessPieceType.Pawn)
+                        {
+                            bP[destIndex] = true;
+                            capturedPiece = new ChessPiecePawn();
+                        }
+                        if (move.CaptureType == ChessPieceType.Knight)
+                        {
+                            bN[destIndex] = true;
+                            capturedPiece = new ChessPieceKnight();
+                        }
+                        else if (move.CaptureType == ChessPieceType.Bishop)
+                        {
+                            bB[destIndex] = true;
+                            capturedPiece = new ChessPieceBishop();
+                        }
+                        else if (move.CaptureType == ChessPieceType.Rook)
+                        {
+                            bR[destIndex] = true;
+                            capturedPiece = new ChessPieceRook();
+                        }
+                        else if (move.CaptureType == ChessPieceType.Queen)
+                        {
+                            bQ[destIndex] = true;
+                            capturedPiece = new ChessPieceQueen();
+                        }
+                        capturedPiece.file = destFile;
+                        capturedPiece.row = destRow;
+                        capturedPiece.color = ChessColor.Black;
+                        BlackPieces[destIndex] = true;
+                        blackPieceList.Add(capturedPiece);
+                        pieceGrid[destFile, destRow] = capturedPiece;
+                    }
+                    else 
+                        pieceGrid[destFile, destRow] = null;
+
+                    CurMoveColor = ChessColor.Black;
+                }
+                else
+                {
+                    // Update black bitboards
+
+                    if (move.PieceType == ChessPieceType.Pawn)
+                    {
+                        bP[srcIndex] = true;
+                        if (!move.Promotion)
+                            bP[destIndex] = false;
+                        else
+                        {
+                            if (move.PromotionType == ChessPieceType.Knight)
+                                bN[destIndex] = false;
+                            else if (move.PromotionType == ChessPieceType.Bishop)
+                                bB[destIndex] = false;
+                            else if (move.PromotionType == ChessPieceType.Rook)
+                                bR[destIndex] = false;
+                            else if (move.PromotionType == ChessPieceType.Queen)
+                                bQ[destIndex] = false;
+                        }
+                    }
+                    else if (move.PieceType == ChessPieceType.Knight)
+                    {
+                        bN[srcIndex] = true;
+                        bN[destIndex] = false;
+                    }
+                    else if (move.PieceType == ChessPieceType.Bishop)
+                    {
+                        bB[srcIndex] = true;
+                        bB[destIndex] = false;
+                    }
+                    else if (move.PieceType == ChessPieceType.Rook)
+                    {
+                        bR[srcIndex] = true;
+                        bR[destIndex] = false;
+                    }
+                    else if (move.PieceType == ChessPieceType.Queen)
+                    {
+                        bQ[srcIndex] = true;
+                        bQ[destIndex] = false;
+                    }
+                    else if (move.PieceType == ChessPieceType.King)
+                    {
+                        bK[srcIndex] = true;
+                        bK[destIndex] = false;
+                    }
+
+                    BlackPieces[srcIndex] = true;
+                    BlackPieces[destIndex] = false;
+
+                    // Restore captured white piece
+
+                    if (move.Capture)
+                    {
+                        ChessPiece capturedPiece = null;
+                        if (move.CaptureType == ChessPieceType.Pawn)
+                        {
+                            wP[destIndex] = true;
+                            capturedPiece = new ChessPiecePawn();
+                        }
+                        if (move.CaptureType == ChessPieceType.Knight)
+                        {
+                            wN[destIndex] = true;
+                            capturedPiece = new ChessPieceKnight();
+                        }
+                        else if (move.CaptureType == ChessPieceType.Bishop)
+                        {
+                            wB[destIndex] = true;
+                            capturedPiece = new ChessPieceBishop();
+                        }
+                        else if (move.CaptureType == ChessPieceType.Rook)
+                        {
+                            wR[destIndex] = true;
+                            capturedPiece = new ChessPieceRook();
+                        }
+                        else if (move.CaptureType == ChessPieceType.Queen)
+                        {
+                            wQ[destIndex] = true;
+                            capturedPiece = new ChessPieceQueen();
+                        }
+                        capturedPiece.file = destFile;
+                        capturedPiece.row = destRow;
+                        capturedPiece.color = ChessColor.White;
+                        WhitePieces[destIndex] = true;
+                        whitePieceList.Add(capturedPiece);
+                        pieceGrid[destFile, destRow] = capturedPiece;
+                    }
+                    else
+                        pieceGrid[destFile, destRow] = null;
+
+                    CurMoveColor = ChessColor.White;
+                }
+
+                AllPieces[srcIndex] = true;
+                AllPieces[destIndex] = move.Capture;
+
+                updateAttackBoards();
+
+                --curMoveIndex;
+            }
+        }
+
+        private void updateAttackBoards()
+        {
+            WhiteAttacks.SetAll(false);
+            foreach (ChessPiece piece in whitePieceList)
+            {
+                List<ChessMove> moves = piece.GetValidMoves(this);
+                foreach (ChessMove m in moves)
+                    if (!(piece is ChessPiecePawn) || m.srcFile != m.destFile)
+                        WhiteAttacks[m.destRow * 8 + m.destFile] = true;
+            }
+            BlackAttacks.SetAll(false);
+            foreach (ChessPiece piece in blackPieceList)
+            {
+                List<ChessMove> moves = piece.GetValidMoves(this);
+                foreach (ChessMove m in moves)
+                    if (!(piece is ChessPiecePawn) || m.srcFile != m.destFile)
+                        BlackAttacks[m.destRow * 8 + m.destFile] = true;
+            }
+        }
 
 #if DEBUG
         private void PrintBitArray(BitArray ba)

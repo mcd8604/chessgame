@@ -11,6 +11,8 @@ namespace ChessLib
         public ChessPieceBishop()
             : base()
         {
+            type = ChessPieceType.Bishop;
+
             // 4 directions for a Bishop
             rowDirs.Add(1);
             fileDirs.Add(1);
