@@ -15,19 +15,32 @@ namespace ChessLib
         public bool GenerateMove(ChessGameState state)
         {
             List<ChessPiece> pieceList = new List<ChessPiece>();
+            ChessPiece piece = null;
+            List<ChessMove> validMoves = null;
+            
+            if (state.CurMoveColor == ChessColor.White)
+                pieceList.AddRange(state.whitePieceList);
+            else
+                pieceList.AddRange(state.blackPieceList);
 
             bool valid = false;
             while (!valid)
             {
-                // Select a piece at random
-                // TODO: exclude pieces with no valid moves, check for stalemate
-                pieceList.Clear();
-                if (state.CurMoveColor == ChessColor.White)
-                    pieceList.AddRange(state.whitePieceList);
-                else
-                    pieceList.AddRange(state.blackPieceList);
+                // Exclude pieces with no valid moves, check for stalemate
+                if (piece != null && validMoves != null)
+                    pieceList.Remove(piece);
 
-                ChessPiece piece = pieceList[rand.Next(pieceList.Count)];
+                if (pieceList.Count <= 0)
+                {
+                    if (state.IsInCheck)
+                        state.CheckMate = true;
+                    else
+                        state.StaleMate = true;
+                    return false;
+                }
+
+                // Select a piece at random
+                piece = pieceList[rand.Next(pieceList.Count)];
 
                 if (state.pieceGrid[piece.file, piece.row] != piece)
                     throw new Exception("Invalid Chess Move.");
@@ -36,7 +49,7 @@ namespace ChessLib
                     throw new Exception("Invalid Piece Color");
 
                 // Determine valid moves for the piece type
-                List<ChessMove> validMoves = piece.GetValidMoves(state);               
+                validMoves = piece.GetValidMoves(state);               
 
                 foreach (ChessMove move in validMoves)
                 {
@@ -70,14 +83,19 @@ namespace ChessLib
                 }
 
                 // Pick a valid move at random
-                if (validMoves.Count > 0)
+                while (!valid && validMoves.Count > 0)
                 {
                     ChessMove m = validMoves[rand.Next(validMoves.Count)];
 #if DEBUG
                     m.DebugPiece = piece;
 #endif
                     valid = state.AddMove(m);
+
+                    if (!valid)
+                        validMoves.Remove(m);
                 }
+
+
             }
 
             return false;

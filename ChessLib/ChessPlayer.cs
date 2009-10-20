@@ -26,7 +26,8 @@ namespace ChessLib
 
         public void MakeMove(ChessGameState state)
         {
-            moveGen.GenerateMove(state);            
+            if(!state.CheckMate)
+                moveGen.GenerateMove(state);            
         }
     }
 }

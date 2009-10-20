@@ -108,18 +108,10 @@ namespace ChessGame
                 p.MakeMove(gs);
 
             if (lastState.IsKeyDown(Keys.Left) && curState.IsKeyUp(Keys.Left))
-            {
-                int moveIndex = gs.CurMoveIndex;
-                if (moveIndex >= 0)
-                    gs.SetMove(moveIndex - 1);
-            }
+                gs.MoveBackward();
 
             if (lastState.IsKeyDown(Keys.Right) && curState.IsKeyUp(Keys.Right))
-            {
-                int moveIndex = gs.CurMoveIndex;
-                if (moveIndex < gs.moves.Count - 1)
-                    gs.SetMove(moveIndex + 1);
-            }
+                gs.MoveForward();
 
             lastState = curState;
 
@@ -132,7 +124,9 @@ namespace ChessGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            p.MakeMove(gs);
+            if(!gs.CheckMate && !gs.StaleMate)
+                p.MakeMove(gs);
+
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // Draw Board
