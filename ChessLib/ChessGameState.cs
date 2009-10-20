@@ -679,7 +679,8 @@ namespace ChessLib
                 ChessPiece piece = pieceGrid[destFile, destRow];
 #if DEBUG
                 if (piece != move.DebugPiece)
-                    throw new Exception("Invalid Piece");
+                    if(!move.Promotion || piece.type != move.PromotionType)
+                        throw new Exception("Invalid Piece");
 #endif
                 // Demote and update piece
 
@@ -805,8 +806,6 @@ namespace ChessLib
                     }
                     else 
                         pieceGrid[destFile, destRow] = null;
-
-                    CurMoveColor = ChessColor.Black;
                 }
                 else
                 {
@@ -897,9 +896,9 @@ namespace ChessLib
                     }
                     else
                         pieceGrid[destFile, destRow] = null;
-
-                    CurMoveColor = ChessColor.White;
                 }
+
+                CurMoveColor = move.Color;
 
                 AllPieces[srcIndex] = true;
                 AllPieces[destIndex] = move.Capture;
