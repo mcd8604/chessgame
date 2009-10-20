@@ -95,6 +95,7 @@
     <Compile Include="IChessGame.cs" />
     <Compile Include="IChessMoveGenerator.cs" />
     <Compile Include="ChessPiece.cs" />
+    <Compile Include="MiniMaxChessMoveGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandomChessMoveGenerator.cs" />
   </ItemGroup>

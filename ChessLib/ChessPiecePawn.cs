@@ -83,6 +83,33 @@ namespace ChessLib
                 validMoves.Add(leftMove);
             }
 
+            List<ChessMove> promotionMoves = new List<ChessMove>();
+            foreach (ChessMove move in validMoves)
+            {
+                move.PieceType = ChessPieceType.Pawn;
+                move.Color = this.color;
+                
+                // Create promotion moves
+                if (move.destRow == 0 || move.destRow == 7)
+                {
+                    move.Promotion = true;
+                    move.PromotionType = ChessPieceType.Knight;
+
+                    ChessMove toBishop = (ChessMove)move.Clone();
+                    toBishop.PromotionType = ChessPieceType.Bishop;
+                    promotionMoves.Add(toBishop);
+
+                    ChessMove toRook = (ChessMove)move.Clone();
+                    toRook.PromotionType = ChessPieceType.Rook;
+                    promotionMoves.Add(toRook);
+
+                    ChessMove toQueen = (ChessMove)move.Clone();
+                    toBishop.PromotionType = ChessPieceType.Queen;
+                    promotionMoves.Add(toQueen);
+                }
+            }
+            validMoves.AddRange(promotionMoves);
+
             return validMoves;
         }
     }

@@ -39,7 +39,7 @@ namespace ChessGame
             Content.RootDirectory = "Content";
 
             gs = new ChessGameState();
-            p = new ChessPlayer(ChessColor.White, new RandomChessMoveGenerator(), 0);
+            p = new ChessPlayer(ChessColor.White, new MiniMaxChessMoveGenerator(3), 0);
         }
 
         /// <summary>
@@ -124,8 +124,8 @@ namespace ChessGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            if(!gs.CheckMate && !gs.StaleMate)
-                p.MakeMove(gs);
+            //if(!gs.CheckMate && !gs.StaleMate)
+                //p.MakeMove(gs);
 
             GraphicsDevice.Clear(Color.CornflowerBlue);
 

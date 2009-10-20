@@ -22,7 +22,7 @@ namespace ChessLib
         King
     }
 
-    public class ChessMove
+    public class ChessMove : ICloneable
     {
         public ChessMove(int srcRow, int srcFile, int destRow, int destFile)
         {
@@ -53,6 +53,14 @@ namespace ChessLib
             sb.AppendLine("Destination Row: " + destRow);
             return sb.ToString();
         }
+        #region ICloneable Members
+
+        public object Clone()
+        {
+            return (ChessMove)this.MemberwiseClone();
+        }
+
+        #endregion
     }
 
     /*public class ChessPiece
@@ -63,7 +71,7 @@ namespace ChessLib
         public int file;
     }*/
 
-    public class ChessGameState
+    public class ChessGameState : ICloneable
     {
         private int curMoveIndex = -1;
         public int CurMoveIndex
@@ -680,7 +688,7 @@ namespace ChessLib
 
                 ChessPiece piece = pieceGrid[destFile, destRow];
 #if DEBUG
-                if (piece != move.DebugPiece)
+                if (move.DebugPiece != null && piece != move.DebugPiece)
                     if(!move.Promotion || piece.type != move.PromotionType)
                         throw new Exception("Invalid Piece");
 #endif
@@ -951,5 +959,72 @@ namespace ChessLib
 #endif
 
         // event StateChanged;
+
+        #region ICloneable Members
+
+        public object Clone()
+        {
+            ChessGameState state = new ChessGameState();
+
+            state.curMoveIndex = this.curMoveIndex;
+            state.CurMoveColor = this.CurMoveColor;
+            state.IsInCheck = this.IsInCheck;
+            state.CheckMate = this.CheckMate;
+            state.StaleMate = this.StaleMate;
+
+            // Clone BitArrays
+
+            state.wP = (BitArray)this.wP.Clone();
+            state.wK = (BitArray)this.wK.Clone();
+            state.wB = (BitArray)this.wB.Clone();
+            state.wR = (BitArray)this.wR.Clone();
+            state.wQ = (BitArray)this.wQ.Clone();
+            state.wK = (BitArray)this.wK.Clone();
+            state.WhitePieces = (BitArray)this.WhitePieces.Clone();
+            state.WhiteAttacks = (BitArray)this.WhiteAttacks.Clone();
+
+            state.bP = (BitArray)this.bP.Clone();
+            state.bK = (BitArray)this.bK.Clone();
+            state.bB = (BitArray)this.bB.Clone();
+            state.bR = (BitArray)this.bR.Clone();
+            state.bQ = (BitArray)this.bQ.Clone();
+            state.bK = (BitArray)this.bK.Clone();
+            state.BlackPieces = (BitArray)this.BlackPieces.Clone();
+            state.BlackAttacks = (BitArray)this.BlackAttacks.Clone();
+
+            state.AllPieces = (BitArray)this.AllPieces.Clone();
+
+            // Clone ChessPieces, lists and grid
+
+            state.pieceGrid = new ChessPiece[8, 8];
+
+            state.whitePieceList = new List<ChessPiece>();
+            foreach (ChessPiece piece in this.whitePieceList)
+            {
+                ChessPiece pieceClone = (ChessPiece)piece.Clone();
+                if (pieceClone is ChessPieceKing)
+                    state.whiteKing = (ChessPieceKing)pieceClone;
+                state.whitePieceList.Add(pieceClone);
+                state.pieceGrid[pieceClone.file, pieceClone.row] = pieceClone;
+            }
+            state.blackPieceList = new List<ChessPiece>();
+            foreach (ChessPiece piece in this.blackPieceList)
+            {
+                ChessPiece pieceClone = (ChessPiece)piece.Clone();
+                if (pieceClone is ChessPieceKing)
+                    state.blackKing = (ChessPieceKing)pieceClone;
+                state.blackPieceList.Add(pieceClone);
+                state.pieceGrid[pieceClone.file, pieceClone.row] = pieceClone;
+            }
+
+            // Clone move list
+
+            foreach (ChessMove move in this.moves)
+                state.moves.Add((ChessMove)move.Clone());
+
+            return state;
+        }
+
+        #endregion
     }
 }

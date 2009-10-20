@@ -49,38 +49,7 @@ namespace ChessLib
                     throw new Exception("Invalid Piece Color");
 
                 // Determine valid moves for the piece type
-                validMoves = piece.GetValidMoves(state);               
-
-                foreach (ChessMove move in validMoves)
-                {
-                    move.Color = piece.color;
-
-                    // Pawn promotion
-                    if (piece is ChessPiecePawn)
-                    {
-                        if (move.destRow == 0 || move.destRow == 7)
-                        {
-                            move.Promotion = true;
-
-                            // Pick a random piece type for promotion
-                            switch (rand.Next(4))
-                            {
-                                case 0:
-                                    move.PromotionType = ChessPieceType.Knight;
-                                    break;
-                                case 1:
-                                    move.PromotionType = ChessPieceType.Bishop;
-                                    break;
-                                case 2:
-                                    move.PromotionType = ChessPieceType.Rook;
-                                    break;
-                                case 3:
-                                    move.PromotionType = ChessPieceType.Queen;
-                                    break;
-                            }
-                        }
-                    }
-                }
+                validMoves = piece.GetValidMoves(state);
 
                 // Pick a valid move at random
                 while (!valid && validMoves.Count > 0)

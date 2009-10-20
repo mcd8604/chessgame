@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ChessLib
 {
-    public abstract class ChessPiece
+    public abstract class ChessPiece : ICloneable
     {
         public ChessPieceType type;
         public ChessColor color;
@@ -22,5 +22,14 @@ namespace ChessLib
         public abstract bool CanMove(int row, int file);
 
         public abstract List<ChessMove> GetValidMoves(ChessGameState state);
+
+        #region ICloneable Members
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
+
+        #endregion
     }
 }
