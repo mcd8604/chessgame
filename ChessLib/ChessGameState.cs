@@ -79,6 +79,8 @@ namespace ChessLib
         public ChessPiece[,] pieceGrid;
         public ChessColor CurMoveColor;
         public bool IsInCheck;
+        public bool CheckMate;
+        public bool StaleMate;
 
         // Store a BitArray for each piece type and color.
         public BitArray wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK;
@@ -388,7 +390,7 @@ namespace ChessLib
             {
                 PrintBitArray(WhiteAttacks);
                 // undo the move
-                moveBackward();
+                MoveBackward();
                 moves.RemoveAt(moves.Count - 1);
                 //SetMove(moves.Count - 1);
                 return false;
@@ -413,15 +415,15 @@ namespace ChessLib
         {
             if (moveIndex <= curMoveIndex)
                 for (int i = curMoveIndex; i > moveIndex; ++i)
-                    moveBackward();
+                    MoveBackward();
             else
                 for (int i = curMoveIndex; i < moveIndex; ++i)
-                    moveForward();
+                    MoveForward();
         }
 
-        private void moveForward()
+        public void MoveForward()
         {
-            if (curMoveIndex < moves.Count)
+            if (curMoveIndex < moves.Count - 1)
             {
                 ChessMove move = moves[curMoveIndex + 1];
 
@@ -661,7 +663,7 @@ namespace ChessLib
             }
         }
 
-        private void moveBackward()
+        public void MoveBackward()
         {
             if (curMoveIndex > 0)
             {
