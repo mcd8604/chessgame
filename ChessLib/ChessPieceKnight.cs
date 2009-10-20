@@ -96,8 +96,10 @@ namespace ChessLib
             }
 
             foreach (ChessMove move in validMoves)
+            {
                 move.PieceType = ChessPieceType.Knight;
-
+                move.Color = this.color;
+            }
             return validMoves;
         }
     }
