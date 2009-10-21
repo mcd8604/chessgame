@@ -116,7 +116,7 @@ namespace ChessLib
                         ChessGameState stateClone = state.Clone() as ChessGameState;
                         if (stateClone.AddMove(move))
                         {
-                            MiniMaxNode child = new MiniMaxNode(stateClone, value);
+                            MiniMaxNode child = doMiniMax(stateClone, value, nextDepth);
 
                             if (child == null)
                                 continue;

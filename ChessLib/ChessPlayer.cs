@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using System.Threading;
 
 namespace ChessLib
 {
@@ -11,6 +12,8 @@ namespace ChessLib
         private ChessColor color;
         private IChessMoveGenerator moveGen;
         private double timeLeft;
+        private Thread moveThread;
+        private ChessGameState state; 
 
         public ChessPlayer(ChessColor color, IChessMoveGenerator moveGenerator, double initTime)
         {
@@ -26,8 +29,15 @@ namespace ChessLib
 
         public void MakeMove(ChessGameState state)
         {
-            if(!state.CheckMate)
-                moveGen.GenerateMove(state);            
+            this.state = state;
+            moveThread = new Thread(new ThreadStart(doMakeMove));
+            moveThread.Start();
+        }
+
+        private void doMakeMove()
+        {
+            if (!state.CheckMate)
+                moveGen.GenerateMove(state);
         }
     }
 }
