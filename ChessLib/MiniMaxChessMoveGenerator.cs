@@ -18,6 +18,8 @@ namespace ChessLib
             }
         }
 
+        private Random rand = new Random();
+
         private int depth;
         private ChessColor curPlayerColor;
 
@@ -47,6 +49,9 @@ namespace ChessLib
         private MiniMaxNode doMiniMax(ChessGameState state, int value, int curDepth)
         {
             List<ChessMove> moves = state.moves;
+            MiniMaxNode best = null;
+            int nextDepth = curDepth - 1;
+            List<MiniMaxNode> bestList = new List<MiniMaxNode>();
             if (state.CheckMate)
             {
                 ChessMove lastMove = moves[moves.Count - 1];
@@ -103,8 +108,6 @@ namespace ChessLib
 
                 // Get valid moves, then perform MiniMax on 
                 // each child to determine the best node
-                int nextDepth = curDepth - 1;
-                MiniMaxNode best = null;
                 foreach (ChessPiece piece in pieces)
                 {
                     List<ChessMove> validMoves = piece.GetValidMoves(state);
@@ -113,18 +116,33 @@ namespace ChessLib
                         ChessGameState stateClone = state.Clone() as ChessGameState;
                         if (stateClone.AddMove(move))
                         {
-                            MiniMaxNode child = doMiniMax(stateClone, value, nextDepth);
+                            MiniMaxNode child = new MiniMaxNode(stateClone, value);
+
                             if (child == null)
                                 continue;
-                            if (best == null || child.value > best.value)
+                            if (best == null)
+                            {
+                                bestList.Add(child);
                                 best = child;
+                            }
+                            else
+                            {
+                                if (child.value > best.value)
+                                {
+                                    bestList.Clear();
+                                    bestList.Add(child);
+                                    best = child;
+                                }
+                                else if (child.value == best.value)
+                                {
+                                    bestList.Add(child);
+                                }
+                            }
                         }
                     }
                 }
-
-                return best;
             }
+            return bestList.Count > 0 ? bestList[rand.Next(bestList.Count)] : null;
         }
-
     }
 }
