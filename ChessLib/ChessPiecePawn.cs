@@ -59,14 +59,20 @@ namespace ChessLib
                 }
             }
 
-            bool eP = state.moves.Count > 0 ? state.moves[state.moves.Count - 1].EnPassant : false;
+            ChessMove lastMove = null;
+            if (state.moves.Count > 0)
+                lastMove = state.moves[state.moves.Count - 1];
 
             // 3 - right attack square
             // (prevent out of bounds)
             if ((file != 0 || dir < 0) &&
                 (file != 7 || dir > 0) &&
                 (enemyPieces[curIndex + (dir * 7)] ||
-                (eP && enemyPieces[curIndex - dir])))
+                // EnPassant
+                (lastMove != null && 
+                lastMove.EnPassant && 
+                lastMove.destRow == row && 
+                lastMove.destFile == file - dir)))
             {
                 ChessMove rightMove = new ChessMove(row, file, row + dir, file - dir);
                 validMoves.Add(rightMove);
@@ -77,7 +83,11 @@ namespace ChessLib
             if ((file != 0 || dir > 0) &&
                 (file != 7 || dir < 0) &&
                 (enemyPieces[curIndex + (dir * 9)] ||
-                (eP && enemyPieces[curIndex + dir])))
+                // EnPassant
+                (lastMove != null && 
+                lastMove.EnPassant && 
+                lastMove.destRow == row && 
+                lastMove.destFile == file + dir)))
             {
                 ChessMove leftMove = new ChessMove(row, file, row + dir, file + dir);
                 validMoves.Add(leftMove);
