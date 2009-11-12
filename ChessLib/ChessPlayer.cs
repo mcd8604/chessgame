@@ -13,7 +13,14 @@ namespace ChessLib
         private IChessMoveGenerator moveGen;
         private double timeLeft;
         private Thread moveThread;
-        private ChessGameState state; 
+        private ChessGameState state;
+        private bool makingMove;
+        /// <summary>
+        /// True if waiting for the player to make a move, false if not.
+        /// </summary>
+        public bool MakingMove { get { return makingMove; } }
+
+        public event ChessMoveEventHandler MadeMove;
 
         public ChessPlayer(ChessColor color, IChessMoveGenerator moveGenerator, double initTime)
         {
@@ -29,15 +36,29 @@ namespace ChessLib
 
         public void MakeMove(ChessGameState state)
         {
-            this.state = state;
-            moveThread = new Thread(new ThreadStart(doMakeMove));
-            moveThread.Start();
+            if (!makingMove)
+            {
+                this.state = state;
+                moveThread = new Thread(new ThreadStart(doMakeMove));
+                moveThread.Start();
+                makingMove = true;
+            }
         }
 
         private void doMakeMove()
         {
-            if (!state.CheckMate)
-                moveGen.GenerateMove(state);
+            if (!state.CheckMate && !state.StaleMate)
+            {
+                ChessGameState stateClone = (ChessGameState)state.Clone();
+
+                // Ensure stateClone is on the most recent move
+                while (stateClone.CurMoveIndex < stateClone.moves.Count - 1)
+                    stateClone.MoveForward();
+
+                moveGen.GenerateMove(stateClone);
+                MadeMove(this, stateClone);
+            }
+            makingMove = false;
         }
     }
 }
