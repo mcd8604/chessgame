@@ -83,6 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChessGameState.cs" />
+    <Compile Include="ChessMoveEventHandler.cs" />
     <Compile Include="ChessPieceBishop.cs" />
     <Compile Include="ChessPieceKing.cs" />
     <Compile Include="ChessPieceKnight.cs" />

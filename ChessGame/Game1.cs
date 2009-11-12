@@ -24,7 +24,9 @@ namespace ChessGame
         SpriteBatch spriteBatch;
 
         ChessGameState gs;
-        ChessPlayer p;
+        ChessPlayer playerWhite;
+        ChessPlayer playerBlack;
+        ChessPlayer currentPlayer;
         Texture2D whiteSquare;
         Texture2D blackSquare;
 
@@ -39,7 +41,22 @@ namespace ChessGame
             Content.RootDirectory = "Content";
 
             gs = new ChessGameState();
-            p = new ChessPlayer(ChessColor.White, new MiniMaxChessMoveGenerator(3), 0);
+            currentPlayer = playerWhite = new ChessPlayer(ChessColor.White, new MiniMaxChessMoveGenerator(4), 0);
+            playerWhite.MadeMove += new ChessMoveEventHandler(playerWhite_MadeMove);
+            playerBlack = new ChessPlayer(ChessColor.Black, new MiniMaxChessMoveGenerator(4), 0);
+            playerBlack.MadeMove += new ChessMoveEventHandler(playerBlack_MadeMove);
+        }
+
+        void playerBlack_MadeMove(ChessPlayer player, ChessGameState state)
+        {
+            gs = state;
+            currentPlayer = playerWhite;
+        }
+
+        void playerWhite_MadeMove(ChessPlayer player, ChessGameState state)
+        {
+            gs = state;
+            currentPlayer = playerBlack;
         }
 
         /// <summary>
@@ -105,8 +122,9 @@ namespace ChessGame
             KeyboardState curState = Keyboard.GetState();
 
             if (lastState.IsKeyDown(Keys.Space) && curState.IsKeyUp(Keys.Space))
-                p.MakeMove(gs);
-
+            {
+                currentPlayer.MakeMove(gs);
+            }
             if (lastState.IsKeyDown(Keys.Left) && curState.IsKeyUp(Keys.Left))
                 gs.MoveBackward();
 
@@ -189,6 +207,9 @@ namespace ChessGame
                     }
                 }
             }
+
+            if (currentPlayer.MakingMove)
+                spriteBatch.DrawString(font, "THINKING...", Vector2.Zero, Color.White);
                 
             spriteBatch.End();
 
