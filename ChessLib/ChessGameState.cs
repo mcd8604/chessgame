@@ -396,7 +396,7 @@ namespace ChessLib
             if((move.Color == ChessColor.White && whiteInCheck) || 
                 (move.Color == ChessColor.Black && blackInCheck))
             {
-                PrintBitArray(WhiteAttacks);
+                //PrintBitArray(WhiteAttacks);
                 // undo the move
                 MoveBackward();
                 moves.RemoveAt(moves.Count - 1);
@@ -529,6 +529,7 @@ namespace ChessLib
                         bQ[destIndex] = false;
 
                         ChessPiece capturedPiece = pieceGrid[destFile, destRow];
+                        move.Capture = true;
                         move.CaptureType = capturedPiece.type;
                         blackPieceList.Remove(capturedPiece);
                     }
