@@ -27,11 +27,10 @@ namespace ChessGame
         ChessPlayer playerWhite;
         ChessPlayer playerBlack;
         ChessPlayer currentPlayer;
-        Texture2D whiteSquare;
-        Texture2D blackSquare;
+        const int BOARD_DIMENSION = 800;
+        const int SQUARE_SIZE = 100;
 
-        const int boardDimension = 800;
-        const int squareSize = 100;
+        ChessBoardSquare[,] uiBoard;
 
         SpriteFont font;
 
@@ -39,24 +38,6 @@ namespace ChessGame
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-
-            gs = new ChessGameState();
-            currentPlayer = playerWhite = new ChessPlayer(ChessColor.White, new MiniMaxChessMoveGenerator(4), 0);
-            playerWhite.MadeMove += new ChessMoveEventHandler(playerWhite_MadeMove);
-            playerBlack = new ChessPlayer(ChessColor.Black, new MiniMaxChessMoveGenerator(4), 0);
-            playerBlack.MadeMove += new ChessMoveEventHandler(playerBlack_MadeMove);
-        }
-
-        void playerBlack_MadeMove(ChessPlayer player, ChessGameState state)
-        {
-            gs = state;
-            currentPlayer = playerWhite;
-        }
-
-        void playerWhite_MadeMove(ChessPlayer player, ChessGameState state)
-        {
-            gs = state;
-            currentPlayer = playerBlack;
         }
 
         /// <summary>
@@ -68,8 +49,53 @@ namespace ChessGame
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+            InitializeChessGame();
+            InitializeUIBoard();
 
             base.Initialize();
+        }
+
+        private void InitializeChessGame()
+        {
+            gs = new ChessGameState();
+
+            MiniMaxChessMoveGenerator miniMax = new MiniMaxChessMoveGenerator(4);
+
+            currentPlayer = playerWhite = new ChessPlayer(ChessColor.White, miniMax, 0);
+            playerWhite.MadeMove += new ChessMoveEventHandler(playerWhite_MadeMove);
+            playerBlack = new ChessPlayer(ChessColor.Black, miniMax, 0);
+            playerBlack.MadeMove += new ChessMoveEventHandler(playerBlack_MadeMove);
+        }
+
+        private void InitializeUIBoard()
+        {
+            uiBoard = new ChessBoardSquare[8, 8];
+
+            for (int file = 0; file < 8; file++)
+            {
+                for (int row = 0; row < 8; row++)
+                {
+                    ChessBoardSquare square = new ChessBoardSquare(this);
+                    uiBoard[file, row] = square;
+                    Components.Add(square);
+                }
+            }
+        }
+
+        void playerBlack_MadeMove(ChessPlayer player, ChessGameState state)
+        {
+            gs = state;
+            currentPlayer = playerWhite;
+            //currentPlayer.MakeMove(gs);
+            updateUIBoard();
+        }
+
+        void playerWhite_MadeMove(ChessPlayer player, ChessGameState state)
+        {
+            gs = state;
+            currentPlayer = playerBlack;
+            //currentPlayer.MakeMove(gs);
+            updateUIBoard();
         }
 
         /// <summary>
@@ -80,21 +106,42 @@ namespace ChessGame
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            LoadUIBoard();
+        }
 
-            graphics.PreferredBackBufferHeight = boardDimension;
-            graphics.PreferredBackBufferWidth = boardDimension;
+        private void LoadUIBoard()
+        {
+            graphics.PreferredBackBufferHeight = BOARD_DIMENSION;
+            graphics.PreferredBackBufferWidth = BOARD_DIMENSION;
             graphics.ApplyChanges();
 
             // Create square textures
             Color[] whiteData = { Color.Silver };
-            whiteSquare = new Texture2D(GraphicsDevice, 1, 1);
+            Texture2D whiteSquare = new Texture2D(GraphicsDevice, 1, 1);
             whiteSquare.SetData<Color>(whiteData);
 
             Color[] blackData = { Color.SteelBlue };
-            blackSquare = new Texture2D(GraphicsDevice, 1, 1);
+            Texture2D blackSquare = new Texture2D(GraphicsDevice, 1, 1);
             blackSquare.SetData<Color>(blackData);
 
             font = Content.Load<SpriteFont>("font");
+
+            for (int row = 0; row < 8; ++row)
+            {
+                for (int file = 0; file < 8; ++file)
+                {
+                    ChessBoardSquare square = uiBoard[file, row];
+                    square.MySpriteBatch = spriteBatch;
+                    square.Font = font;
+                    square.Destination = new Rectangle(SQUARE_SIZE * file, SQUARE_SIZE * row, SQUARE_SIZE, SQUARE_SIZE);
+                    if ((row % 2 == 0 && file % 2 == 0) ||
+                        row % 2 == 1 && file % 2 == 1)
+                        square.BackgroundTexture = whiteSquare;
+                    else
+                        square.BackgroundTexture = blackSquare;
+                }
+            }
+            updateUIBoard();
         }
 
         /// <summary>
@@ -137,83 +184,60 @@ namespace ChessGame
         }
 
         /// <summary>
+        /// Updates the pieces displayed on the uiBoard
+        /// </summary>
+        private void updateUIBoard()
+        {
+            for (int row = 0; row < 8; ++row)
+            {
+                for (int file = 0; file < 8; ++file)
+                {
+                    // Update squares
+                    ChessPiece piece = gs.pieceGrid[file, row];
+                    ChessBoardSquare square = uiBoard[file, row];
+
+                    if (piece == null)
+                        square.ChessPiece = string.Empty;
+                    else 
+                    {
+                        if (piece is ChessPiecePawn)
+                            square.ChessPiece = "P";
+                        else if (piece is ChessPieceKnight)
+                            square.ChessPiece = "N";
+                        else if (piece is ChessPieceBishop)
+                            square.ChessPiece = "B";
+                        else if (piece is ChessPieceRook)
+                            square.ChessPiece = "R";
+                        else if (piece is ChessPieceQueen)
+                            square.ChessPiece = "Q";
+                        else if (piece is ChessPieceKing)
+                            square.ChessPiece = "K";
+
+                        if (piece.color == ChessColor.Black)
+                            square.PieceColor = Color.Black;
+                        else
+                            square.PieceColor = Color.White;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            //if(!gs.CheckMate && !gs.StaleMate)
-                //p.MakeMove(gs);
-
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // Draw Board
-            Vector2 position;
-            Rectangle dest;
+            base.Draw(gameTime);
+
             spriteBatch.Begin();
-            for(int row = 0; row < 8; ++row)
-            {
-                for(int file = 0; file < 8; ++file)
-                {
-                    dest = new Rectangle(squareSize * file, squareSize * row, squareSize, squareSize);
-                    if ((row % 2 == 0 && file % 2 == 0) ||
-                        row % 2 == 1 && file % 2 == 1)
-                    {
-                        spriteBatch.Draw(whiteSquare, dest, Color.White);
-                    }
-                    else
-                    {
-                        spriteBatch.Draw(blackSquare, dest, Color.White);
-                    }
-
-                    // Draw Piece
-                    ChessPiece piece = gs.pieceGrid[file, row];
-                    if(piece != null)
-                    {
-                        string pieceString = string.Empty;
-                        if (piece is ChessPiecePawn)
-                        {
-                            pieceString = "P";
-                        }
-                        else if (piece is ChessPieceKnight)
-                        {
-                            pieceString = "N";
-                        }
-                        else if (piece is ChessPieceBishop)
-                        {
-                            pieceString = "B";
-                        }
-                        else if (piece is ChessPieceRook)
-                        {
-                            pieceString = "R";
-                        }
-                        else if (piece is ChessPieceQueen)
-                        {
-                            pieceString = "Q";
-                        }
-                        else if (piece is ChessPieceKing)
-                        {
-                            pieceString = "K";
-                        }
-
-                        Color color;
-                        if(piece.color == ChessColor.Black)
-                            color = Color.Black;
-                        else
-                            color = Color.White;
-
-                        position = new Vector2(dest.Center.X, dest.Center.Y);
-                        spriteBatch.DrawString(font, pieceString, position, color); 
-                    }
-                }
-            }
 
             if (currentPlayer.MakingMove)
                 spriteBatch.DrawString(font, "THINKING...", Vector2.Zero, Color.White);
                 
             spriteBatch.End();
-
-            base.Draw(gameTime);
         }
     }
 }
