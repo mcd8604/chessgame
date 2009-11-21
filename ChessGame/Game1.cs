@@ -58,6 +58,7 @@ namespace ChessGame
         private void InitializeChessGame()
         {
             gs = new ChessGameState();
+            gs.SetNewGame();
 
             MiniMaxChessMoveGenerator miniMax = new MiniMaxChessMoveGenerator(4);
 
