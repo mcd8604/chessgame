@@ -1,7 +1,13 @@
-﻿using System;
+﻿#undef SHOW_TREE
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
+#if SHOW_TREE
+using System.Windows.Forms;
+#endif
 
 namespace ChessLib
 {
@@ -28,9 +34,16 @@ namespace ChessLib
         private int depth;
         private ChessColor curPlayerColor;
 
+#if SHOW_TREE
+        private TreeViewForm tree;
+#endif
         public MiniMaxChessMoveGenerator(int depth)
         {
             this.depth = depth;
+#if SHOW_TREE
+            tree = new TreeViewForm();
+            tree.Show();
+#endif
         }
 
         #region IChessMoveGenerator Members
@@ -41,13 +54,23 @@ namespace ChessLib
         {
             curPlayerColor = state.CurMoveColor;
             cutoffs = 0;
-            MiniMaxNode node = alphaBetaMax(state, int.MinValue, int.MaxValue, depth);
+
+#if SHOW_TREE
+            // Set root TreeNode
+            TreeNode root = new TreeNode();
+            root.Text = "A: " + int.MinValue + ",   B:" + int.MaxValue;
+            tree.AddNode(null, root);
+
+            MiniMaxNode alpha = alphaBetaMax(state, int.MinValue, int.MaxValue, depth, root);
+#else
+            MiniMaxNode alpha = alphaBetaMax(state, int.MinValue, int.MaxValue, depth);
+#endif
             Console.WriteLine(cutoffs);
 
-            if(node == null) return false;
+            if (alpha == null) return false;
 
             // Perform the move
-            List<ChessMove> moves = node.state.moves;
+            List<ChessMove> moves = alpha.state.moves;
             state.AddMove(moves[state.moves.Count]);
 
             return true;
@@ -55,7 +78,11 @@ namespace ChessLib
 
         #endregion
 
+#if SHOW_TREE
+        private MiniMaxNode alphaBetaMax(ChessGameState state, int alpha, int beta, int depthLeft, TreeNode curNode)
+#else
         private MiniMaxNode alphaBetaMax(ChessGameState state, int alpha, int beta, int depthLeft)
+#endif
         {
             int nextDepth = depthLeft - 1;
             List<ChessMove> moves = state.moves;
@@ -93,7 +120,9 @@ namespace ChessLib
                             totalValue -= moveValue;
                     }
                 }
-
+#if SHOW_TREE
+                tree.SetNode(curNode, totalValue.ToString());
+#endif
                 return new MiniMaxNode(state, totalValue);
             }
             else
@@ -124,17 +153,25 @@ namespace ChessLib
                             }
                             else if (stateClone.StaleMate)
                                 return new MiniMaxNode(stateClone, int.MinValue);
-
+#if SHOWTREE
+                            TreeNode childNode = new TreeNode("A:" + alpha + ",  B:" + beta);
+                            tree.AddNode(curNode, childNode);
+                            MiniMaxNode child = alphaBetaMin(stateClone, alpha, beta, nextDepth, childNode);
+#else
                             MiniMaxNode child = alphaBetaMin(stateClone, alpha, beta, nextDepth);
+#endif
 
                             if (child == null)
                                 continue;
                             else
                             {
                                 int score = child.value;
-                                if (score >= beta) // beta cutoff
+                                if (score > beta) // beta cutoff
                                 {
                                     ++cutoffs;
+#if SHOW_TREE
+                                    tree.SetNode(curNode, curNode.Text + "Beta Cutoff");
+#endif
                                     return child;
                                 }
                                 else if (score == alpha) // an equal alpha max
@@ -142,6 +179,9 @@ namespace ChessLib
                                 else if (score > alpha) // a new alpha max
                                 {
                                     alpha = score;
+#if SHOW_TREE
+                                    tree.SetNode(curNode, "A:" + alpha + ",  B:" + beta);
+#endif
                                     nodeList.Clear();
                                     nodeList.Add(child);
                                 }
@@ -153,7 +193,11 @@ namespace ChessLib
             return nodeList.Count > 0 ? nodeList[rand.Next(nodeList.Count)] : null;
         }
 
+#if SHOW_TREE
+        private MiniMaxNode alphaBetaMin(ChessGameState state, int alpha, int beta, int depthLeft, TreeNode curNode)
+#else
         private MiniMaxNode alphaBetaMin(ChessGameState state, int alpha, int beta, int depthLeft)
+#endif
         {
             int nextDepth = depthLeft - 1;
             List<ChessMove> moves = state.moves;
@@ -191,8 +235,10 @@ namespace ChessLib
                             totalValue -= moveValue;
                     }
                 }
-
-                return new MiniMaxNode(state, -totalValue);
+#if SHOW_TREE
+                tree.SetNode(curNode, totalValue.ToString());
+#endif
+                return new MiniMaxNode(state, totalValue);
             }
             else
             {
@@ -222,17 +268,24 @@ namespace ChessLib
                             }
                             else if (stateClone.StaleMate)
                                 return new MiniMaxNode(stateClone, int.MinValue);
-
+#if SHOW_TREE 
+                            TreeNode childNode = new TreeNode("A:" + alpha + ",  B:" + beta);
+                            tree.AddNode(curNode, childNode);
+                            MiniMaxNode child = alphaBetaMax(stateClone, alpha, beta, nextDepth, childNode);
+#else
                             MiniMaxNode child = alphaBetaMax(stateClone, alpha, beta, nextDepth);
-
+#endif
                             if (child == null)
                                 continue;
                             else
                             {
                                 int score = child.value;
-                                if (score <= alpha) // alpha cutoff
+                                if (score < alpha) // alpha cutoff
                                 {
                                     ++cutoffs;
+#if SHOW_TREE
+                                    tree.SetNode(curNode, curNode.Text + "Alpha Cutoff");
+#endif
                                     return child;
                                 }
                                 else if (score == beta) // equal beta min
@@ -240,6 +293,9 @@ namespace ChessLib
                                 else if (score < beta) // new beta min
                                 {
                                     beta = score;
+#if SHOW_TREE
+                                    tree.SetNode(curNode, "A:" + alpha + ",  B:" + beta);
+#endif
                                     nodeList.Clear();
                                     nodeList.Add(child);
                                 }
