@@ -6,9 +6,9 @@ using System.Collections;
 
 namespace ChessLib
 {
-    public class ChessPieceBishop : ChessPieceSlider
+    internal class ChessPieceBishop : ChessPieceSlider
     {
-        public ChessPieceBishop()
+        internal ChessPieceBishop()
             : base()
         {
             type = ChessPieceType.Bishop;
@@ -27,7 +27,7 @@ namespace ChessLib
             fileDirs.Add(-1);
         }
 
-        /*public override List<ChessMove> GetValidMoves(ChessGameState state)
+        /*internal override List<ChessMove> GetValidMoves(ChessGameState state)
         {
             List<ChessMove> validMoves = new List<ChessMove>();
 

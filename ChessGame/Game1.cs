@@ -23,10 +23,8 @@ namespace ChessGame
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        ChessGameState gs;
-        ChessPlayer playerWhite;
-        ChessPlayer playerBlack;
-        ChessPlayer currentPlayer;
+        ChessGameProxy chessGame;
+
         const int BOARD_DIMENSION = 800;
         const int SQUARE_SIZE = 100;
 
@@ -49,23 +47,17 @@ namespace ChessGame
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            InitializeChessGame();
+            chessGame = new ChessGameProxy();
+            chessGame.Updated += new ChessGameUpdate(chessGame_Updated);
             InitializeUIBoard();
+            chessGame.StartGame(PlayerType.Computer, PlayerType.Computer);
 
             base.Initialize();
         }
 
-        private void InitializeChessGame()
+        void chessGame_Updated(ChessPieceInfo?[,] pieceInfo)
         {
-            gs = new ChessGameState();
-            gs.SetNewGame();
-
-            MiniMaxChessMoveGenerator miniMax = new MiniMaxChessMoveGenerator(4);
-
-            currentPlayer = playerWhite = new ChessPlayer(ChessColor.White, miniMax, 0);
-            playerWhite.MadeMove += new ChessMoveEventHandler(playerWhite_MadeMove);
-            playerBlack = new ChessPlayer(ChessColor.Black, miniMax, 0);
-            playerBlack.MadeMove += new ChessMoveEventHandler(playerBlack_MadeMove);
+            updateUIBoard(pieceInfo);
         }
 
         private void InitializeUIBoard()
@@ -81,22 +73,6 @@ namespace ChessGame
                     Components.Add(square);
                 }
             }
-        }
-
-        void playerBlack_MadeMove(ChessPlayer player, ChessGameState state)
-        {
-            gs = state;
-            currentPlayer = playerWhite;
-            //currentPlayer.MakeMove(gs);
-            updateUIBoard();
-        }
-
-        void playerWhite_MadeMove(ChessPlayer player, ChessGameState state)
-        {
-            gs = state;
-            currentPlayer = playerBlack;
-            //currentPlayer.MakeMove(gs);
-            updateUIBoard();
         }
 
         /// <summary>
@@ -142,7 +118,6 @@ namespace ChessGame
                         square.BackgroundTexture = blackSquare;
                 }
             }
-            updateUIBoard();
         }
 
         /// <summary>
@@ -170,14 +145,13 @@ namespace ChessGame
             KeyboardState curState = Keyboard.GetState();
 
             if (lastState.IsKeyDown(Keys.Space) && curState.IsKeyUp(Keys.Space))
-            {
-                currentPlayer.MakeMove(gs);
-            }
+                chessGame.MakeMove();
+
             if (lastState.IsKeyDown(Keys.Left) && curState.IsKeyUp(Keys.Left))
-                gs.MoveBackward();
+                chessGame.MoveBackward();
 
             if (lastState.IsKeyDown(Keys.Right) && curState.IsKeyUp(Keys.Right))
-                gs.MoveForward();
+                chessGame.MoveForward();
 
             lastState = curState;
 
@@ -187,34 +161,35 @@ namespace ChessGame
         /// <summary>
         /// Updates the pieces displayed on the uiBoard
         /// </summary>
-        private void updateUIBoard()
+        private void updateUIBoard(ChessPieceInfo?[,] pieceGrid)
         {
             for (int row = 0; row < 8; ++row)
             {
                 for (int file = 0; file < 8; ++file)
                 {
                     // Update squares
-                    ChessPiece piece = gs.pieceGrid[file, row];
+                    ChessPieceInfo? piece = pieceGrid[file, row];
                     ChessBoardSquare square = uiBoard[file, row];
 
-                    if (piece == null)
+                    if (!piece.HasValue)
                         square.ChessPiece = string.Empty;
                     else 
                     {
-                        if (piece is ChessPiecePawn)
+                        ChessPieceInfo i = piece.Value;
+                        if (i.Type == ChessPieceType.Pawn)
                             square.ChessPiece = "P";
-                        else if (piece is ChessPieceKnight)
+                        else if (i.Type == ChessPieceType.Knight)
                             square.ChessPiece = "N";
-                        else if (piece is ChessPieceBishop)
+                        else if (i.Type == ChessPieceType.Bishop)
                             square.ChessPiece = "B";
-                        else if (piece is ChessPieceRook)
+                        else if (i.Type == ChessPieceType.Rook)
                             square.ChessPiece = "R";
-                        else if (piece is ChessPieceQueen)
+                        else if (i.Type == ChessPieceType.Queen)
                             square.ChessPiece = "Q";
-                        else if (piece is ChessPieceKing)
+                        else if (i.Type == ChessPieceType.King)
                             square.ChessPiece = "K";
 
-                        if (piece.color == ChessColor.Black)
+                        if (i.Color == ChessColor.Black)
                             square.PieceColor = Color.Black;
                         else
                             square.PieceColor = Color.White;
@@ -235,8 +210,8 @@ namespace ChessGame
 
             spriteBatch.Begin();
 
-            if (currentPlayer.MakingMove)
-                spriteBatch.DrawString(font, "THINKING...", Vector2.Zero, Color.White);
+            //if (game.MakingMove)
+            //    spriteBatch.DrawString(font, "THINKING...", Vector2.Zero, Color.White);
                 
             spriteBatch.End();
         }

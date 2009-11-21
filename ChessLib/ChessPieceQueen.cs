@@ -5,9 +5,9 @@ using System.Text;
 
 namespace ChessLib
 {
-    public class ChessPieceQueen : ChessPieceSlider
+    internal class ChessPieceQueen : ChessPieceSlider
     {
-        public ChessPieceQueen()
+        internal ChessPieceQueen()
             : base()
         {
             type = ChessPieceType.Queen;

@@ -5,11 +5,11 @@ using System.Text;
 
 namespace ChessLib
 {
-    class HumanChessMoveGenerator : IChessMoveGenerator
+    internal class HumanChessMoveGenerator : IChessMoveGenerator
     {
         #region IChessMoveGenerator Members
 
-        public bool GenerateMove(ChessGameState state)
+        internal override bool GenerateMove(ChessGameState state)
         {
             throw new NotImplementedException();
         }

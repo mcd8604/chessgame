@@ -84,7 +84,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChessGameProxy.cs" />
     <Compile Include="ChessGameState.cs" />
+    <Compile Include="ChessGameUpdate.cs" />
     <Compile Include="ChessMoveEventHandler.cs" />
     <Compile Include="ChessPieceBishop.cs" />
     <Compile Include="ChessPieceKing.cs" />

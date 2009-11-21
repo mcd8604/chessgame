@@ -5,9 +5,9 @@ using System.Text;
 
 namespace ChessLib
 {
-    public class ChessPieceRook : ChessPieceSlider
+    internal class ChessPieceRook : ChessPieceSlider
     {
-        public ChessPieceRook()
+        internal ChessPieceRook()
             : base()
         {
             type = ChessPieceType.Rook;
