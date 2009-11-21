@@ -275,15 +275,13 @@ namespace ChessLib
         public ChessGameState()
         {
             moves = new List<ChessMove>();
-            createNewBoardState();
-        }
-
-        private void createNewBoardState()
-        {
             whitePieceList = new List<ChessPiece>();
             blackPieceList = new List<ChessPiece>();
             pieceGrid = new ChessPiece[8, 8];
+        }        
 
+        public void SetNewGame()
+        {
             wP = new BitArray(DEFAULT_WHITE_PAWNS);
             wN = new BitArray(DEFAULT_WHITE_KNIGHTS);
             wB = new BitArray(DEFAULT_WHITE_BISHOPS);
@@ -976,7 +974,7 @@ namespace ChessLib
             // Clone BitArrays
 
             state.wP = (BitArray)this.wP.Clone();
-            state.wK = (BitArray)this.wK.Clone();
+            state.wN = (BitArray)this.wK.Clone();
             state.wB = (BitArray)this.wB.Clone();
             state.wR = (BitArray)this.wR.Clone();
             state.wQ = (BitArray)this.wQ.Clone();
@@ -985,7 +983,7 @@ namespace ChessLib
             state.WhiteAttacks = (BitArray)this.WhiteAttacks.Clone();
 
             state.bP = (BitArray)this.bP.Clone();
-            state.bK = (BitArray)this.bK.Clone();
+            state.bN = (BitArray)this.bK.Clone();
             state.bB = (BitArray)this.bB.Clone();
             state.bR = (BitArray)this.bR.Clone();
             state.bQ = (BitArray)this.bQ.Clone();
@@ -997,9 +995,6 @@ namespace ChessLib
 
             // Clone ChessPieces, lists and grid
 
-            state.pieceGrid = new ChessPiece[8, 8];
-
-            state.whitePieceList = new List<ChessPiece>();
             foreach (ChessPiece piece in this.whitePieceList)
             {
                 ChessPiece pieceClone = (ChessPiece)piece.Clone();
@@ -1008,7 +1003,6 @@ namespace ChessLib
                 state.whitePieceList.Add(pieceClone);
                 state.pieceGrid[pieceClone.file, pieceClone.row] = pieceClone;
             }
-            state.blackPieceList = new List<ChessPiece>();
             foreach (ChessPiece piece in this.blackPieceList)
             {
                 ChessPiece pieceClone = (ChessPiece)piece.Clone();
@@ -1019,7 +1013,6 @@ namespace ChessLib
             }
 
             // Clone move list
-
             foreach (ChessMove move in this.moves)
                 state.moves.Add((ChessMove)move.Clone());
 
