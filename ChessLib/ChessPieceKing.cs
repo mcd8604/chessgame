@@ -6,19 +6,19 @@ using System.Collections;
 
 namespace ChessLib
 {
-    public class ChessPieceKing : ChessPiece
+    internal class ChessPieceKing : ChessPiece
     {
-        public ChessPieceKing()
+        internal ChessPieceKing()
         {
             type = ChessPieceType.King;
         }
 
-        public override bool CanMove(int row, int file)
+        internal override bool CanMove(int row, int file)
         {
             throw new NotImplementedException();
         }
 
-        public override List<ChessMove> GetValidMoves(ChessGameState state)
+        internal override List<ChessMove> GetValidMoves(ChessGameState state)
         {
             List<ChessMove> validMoves = new List<ChessMove>();
 
@@ -115,7 +115,7 @@ namespace ChessLib
             return validMoves;
         }
 
-        /*public bool IsInCheck(ChessGameState state)
+        /*internal bool IsInCheck(ChessGameState state)
         {            
             bool inCheck = false;
 

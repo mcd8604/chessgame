@@ -5,8 +5,8 @@ using System.Text;
 
 namespace ChessLib
 {
-    public interface IChessMoveGenerator
+    internal abstract class IChessMoveGenerator
     {
-        bool GenerateMove(ChessGameState state);
+        internal abstract bool GenerateMove(ChessGameState state);
     }
 }

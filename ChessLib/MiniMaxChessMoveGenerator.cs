@@ -16,7 +16,7 @@ namespace ChessLib
     /// An alpha-beta pruning algorithm is also applied.
     /// TODO: implement iterative deepening
     /// </summary>
-    public class MiniMaxChessMoveGenerator : IChessMoveGenerator
+    internal class MiniMaxChessMoveGenerator : IChessMoveGenerator
     {
         private class MiniMaxNode
         {
@@ -37,7 +37,7 @@ namespace ChessLib
 #if SHOW_TREE
         private TreeViewForm tree;
 #endif
-        public MiniMaxChessMoveGenerator(int depth)
+        internal MiniMaxChessMoveGenerator(int depth)
         {
             this.depth = depth;
 #if SHOW_TREE
@@ -50,7 +50,7 @@ namespace ChessLib
 
         private int cutoffs;
 
-        public bool GenerateMove(ChessGameState state)
+        internal override bool GenerateMove(ChessGameState state)
         {
             curPlayerColor = state.CurMoveColor;
             cutoffs = 0;

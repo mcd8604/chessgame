@@ -6,24 +6,24 @@ using System.Collections;
 
 namespace ChessLib
 {
-    public class ChessPieceSlider : ChessPiece
+    internal class ChessPieceSlider : ChessPiece
     {
         protected List<int> rowDirs;
         protected List<int> fileDirs;
 
-        public ChessPieceSlider()
+        internal ChessPieceSlider()
             : base()
         {
             rowDirs = new List<int>();
             fileDirs = new List<int>();
         }
 
-        public override bool CanMove(int row, int file)
+        internal override bool CanMove(int row, int file)
         {
             throw new NotImplementedException();
         }
 
-        public override List<ChessMove> GetValidMoves(ChessGameState state)
+        internal override List<ChessMove> GetValidMoves(ChessGameState state)
         {
             List<ChessMove> validMoves = new List<ChessMove>();
 

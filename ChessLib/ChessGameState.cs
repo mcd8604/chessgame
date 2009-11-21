@@ -6,42 +6,27 @@ using System.Text;
 
 namespace ChessLib
 {
-    public enum ChessColor
+    class ChessMove : ICloneable
     {
-        White,
-        Black
-    }
-
-    public enum ChessPieceType
-    {
-        Pawn,
-        Knight,
-        Bishop,
-        Rook,
-        Queen,
-        King
-    }
-
-    public class ChessMove : ICloneable
-    {
-        public ChessMove(int srcRow, int srcFile, int destRow, int destFile)
+        internal ChessMove(int srcRow, int srcFile, int destRow, int destFile)
         {
             this.srcRow = srcRow;
             this.srcFile = srcFile;
             this.destRow = destRow;
             this.destFile = destFile;
         }
-        public int srcRow, srcFile, destRow, destFile;
-        public ChessColor Color;
-        public ChessPieceType PieceType;
-        public bool EnPassant;
-        public bool Promotion;
-        public ChessPieceType PromotionType;
+        internal int srcRow, srcFile, destRow, destFile;
+        internal ChessColor Color;
+        internal ChessPieceType PieceType;
+        internal bool EnPassant;
+        internal bool Promotion;
+        internal ChessPieceType PromotionType;
 #if DEBUG
-        public ChessPiece DebugPiece;
+        internal ChessPiece DebugPiece;
 #endif
-        public bool Capture;
-        public ChessPieceType CaptureType;
+        internal bool Capture;
+        internal ChessPieceType CaptureType;
+        
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -63,41 +48,41 @@ namespace ChessLib
         #endregion
     }
 
-    /*public class ChessPiece
+    /*internal class ChessPiece
     {
-        public ChessPieceType type;
-        public ChessColor color;
-        public int row;
-        public int file;
+        internal ChessPieceType type;
+        internal ChessColor color;
+        internal int row;
+        internal int file;
     }*/
 
-    public class ChessGameState : ICloneable
+    class ChessGameState : ICloneable
     {
         private int curMoveIndex = -1;
-        public int CurMoveIndex
+        internal int CurMoveIndex
         {
             get { return curMoveIndex; }
         }
 
-        public List<ChessMove> moves;
-        public List<ChessPiece> whitePieceList;
-        public List<ChessPiece> blackPieceList;
-        public ChessPieceKing whiteKing;
-        public ChessPieceKing blackKing;
-        public ChessPiece[,] pieceGrid;
-        public ChessColor CurMoveColor;
-        public bool IsInCheck;
-        public bool CheckMate;
-        public bool StaleMate;
+        internal List<ChessMove> moves;
+        internal List<ChessPiece> whitePieceList;
+        internal List<ChessPiece> blackPieceList;
+        internal ChessPieceKing whiteKing;
+        internal ChessPieceKing blackKing;
+        internal ChessPiece[,] pieceGrid;
+        internal ChessColor CurMoveColor;
+        internal bool IsInCheck;
+        internal bool CheckMate;
+        internal bool StaleMate;
 
         // Store a BitArray for each piece type and color.
-        public BitArray wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK;
+        internal BitArray wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK;
 
-        public BitArray WhitePieces;
-        public BitArray WhiteAttacks;
-        public BitArray BlackPieces;
-        public BitArray BlackAttacks;
-        public BitArray AllPieces;
+        internal BitArray WhitePieces;
+        internal BitArray WhiteAttacks;
+        internal BitArray BlackPieces;
+        internal BitArray BlackAttacks;
+        internal BitArray AllPieces;
 
 #region Default piece sets for new game
 
@@ -272,7 +257,7 @@ namespace ChessLib
 
 #endregion
 
-        public ChessGameState()
+        internal ChessGameState()
         {
             moves = new List<ChessMove>();
             whitePieceList = new List<ChessPiece>();
@@ -280,7 +265,7 @@ namespace ChessLib
             pieceGrid = new ChessPiece[8, 8];
         }        
 
-        public void SetNewGame()
+        internal void SetNewGame()
         {
             wP = new BitArray(DEFAULT_WHITE_PAWNS);
             wN = new BitArray(DEFAULT_WHITE_KNIGHTS);
@@ -378,7 +363,7 @@ namespace ChessLib
             CurMoveColor = ChessColor.White;
         }
 
-        public bool AddMove(ChessMove move)
+        internal bool AddMove(ChessMove move)
         {
             moves.Add(move);
 
@@ -417,7 +402,7 @@ namespace ChessLib
         /// Sets the board state to the move at moveIndex.
         /// </summary>
         /// <param name="moveIndex">The index of the move to set the board state.</param>
-        public void SetMove(int moveIndex)
+        internal void SetMove(int moveIndex)
         {
             if (moveIndex <= curMoveIndex)
                 for (int i = curMoveIndex; i > moveIndex; ++i)
@@ -427,7 +412,7 @@ namespace ChessLib
                     MoveForward();
         }
 
-        public void MoveForward()
+        internal void MoveForward()
         {
             if (curMoveIndex < moves.Count - 1)
             {
@@ -670,7 +655,7 @@ namespace ChessLib
             }
         }
 
-        public void MoveBackward()
+        internal void MoveBackward()
         {
             if (curMoveIndex > 0)
             {

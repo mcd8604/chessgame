@@ -6,13 +6,13 @@ using System.Collections;
 
 namespace ChessLib
 {
-    public class RandomChessMoveGenerator : IChessMoveGenerator
+    class RandomChessMoveGenerator : IChessMoveGenerator
     {
         #region IChessMoveGenerator Members
 
         Random rand = new Random();
 
-        public bool GenerateMove(ChessGameState state)
+        internal override bool GenerateMove(ChessGameState state)
         {
             List<ChessPiece> pieceList = new List<ChessPiece>();
             ChessPiece piece = null;

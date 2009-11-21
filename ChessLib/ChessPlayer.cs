@@ -7,7 +7,13 @@ using System.Threading;
 
 namespace ChessLib
 {
-    public class ChessPlayer
+    public enum PlayerType
+    {
+        Human,
+        Computer
+    }
+
+    internal class ChessPlayer
     {
         private ChessColor color;
         private IChessMoveGenerator moveGen;

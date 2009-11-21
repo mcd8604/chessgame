@@ -5,5 +5,5 @@ using System.Text;
 
 namespace ChessLib
 {
-    internal delegate void ChessMoveEventHandler(ChessPlayer player, ChessGameState state);
+    public delegate void ChessGameUpdate(ChessPieceInfo?[,] pieceInfo);
 }
